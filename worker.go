@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+const (
+	QUEUENAME = "samowar1"
+)
+
 //Function argument to job
 type funcarg func(interface{}) interface{}
 type funcargint func(int) interface{}
@@ -86,7 +90,7 @@ func (work *Worker) showJobs() {
 
 func (worker *Worker) start() {
 	backend := worker.Backend
-	backend.subscribe("samowar1")
+	backend.subscribe(QUEUENAME)
 	go func() {
 		for {
 
