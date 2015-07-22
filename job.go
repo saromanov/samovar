@@ -20,7 +20,10 @@ type Job struct {
 	options       Options
 	//delay in seconds
 	delay time.Duration
+	result chan interface{}
+	executionTime chan int64
 }
+
 
 //This struct provides basic options for job
 type Options struct {
@@ -82,10 +85,13 @@ func (j *Job) IsDone() bool {
 func (j *Job) jobRun(arguments interface{}) {
 	go func() {
 		time.Sleep(time.Second)
-		j.Data(arguments)
+		starttime := time.Now().UnixNano()
+		j.result <- j.Data(arguments)
+		j.executionTime <- time.Now().UnixNano() - starttime
 		j.lock.Lock()
 		j.numberofcalls++
 		j.lock.Unlock()
 		j.done <- true
 	}()
 }
+
