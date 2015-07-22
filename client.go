@@ -6,6 +6,13 @@ type Client struct {
 	backend *RedisBackend
 }
 
+type JobOptions struct {
+	Arguments interface{}
+	Delay     uint
+	Period    uint
+	Priority  uint
+}
+
 func InitClient() *Client {
 	client := new(Client)
 	client.backend = InitRedisBackend()
@@ -13,10 +20,10 @@ func InitClient() *Client {
 }
 
 //Send provides sending arguments to the function
-func (gro *Client) Send(jobtitle string, args interface{}) {
+func (gro *Client) Send(jobtitle string, opt *JobOptions) {
 	gro.backend.publishJob(PrepareParameters(&JobParams{
 		Name:      jobtitle,
-		Arguments: args,
+		Arguments: opt.Arguments,
 	}))
 }
 
