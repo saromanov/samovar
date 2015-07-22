@@ -27,3 +27,11 @@ func (gro *Client) SendWithDelay(jobtitle string, delay uint, args interface{}) 
 		Delay:     delay,
 	}))
 }
+
+func (gro *Client) SendWithPeriod(jobtitle string, sec uint, args interface{}) {
+	gro.backend.publishJob(PrepareParameters(&JobParams{
+		Name:      jobtitle,
+		Arguments: args,
+		Period:    sec,
+	}))
+}

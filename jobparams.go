@@ -9,6 +9,7 @@ type JobParams struct {
 	Name      string
 	Arguments interface{}
 	Delay     uint
+	Period    uint
 }
 
 func GetJobArguments(item string) JobParams {

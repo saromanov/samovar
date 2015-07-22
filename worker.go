@@ -106,6 +106,8 @@ func (worker *Worker) start() {
 					targetjob := worker.jobs[job.Name]
 					if job.Delay > 0 {
 						targetjob.RunWithDelay(job.Arguments, job.Delay)
+					} else if job.Period > 0 {
+						targetjob.RunEvery(job.Arguments, job.Period)
 					} else {
 						targetjob.Run(job.Arguments)
 					}
