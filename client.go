@@ -7,6 +7,7 @@ type Client struct {
 }
 
 type JobOptions struct {
+	Title     string
 	Arguments interface{}
 	Delay     uint
 	Period    uint
@@ -22,7 +23,7 @@ func InitClient() *Client {
 
 //Send provides sending arguments to the function
 func (gro *Client) Send(jobtitle string, opt *JobOptions) {
-	gro.backend.publishJob(PrepareParameters(&JobParams{
+	gro.backend.publishJob(prepareParameters(&JobParams{
 		Name:      jobtitle,
 		Arguments: opt.Arguments,
 	}))
@@ -30,7 +31,7 @@ func (gro *Client) Send(jobtitle string, opt *JobOptions) {
 
 //SendWithDelay provides sending arguments to job with delay
 func (gro *Client) SendWithDelay(jobtitle string, delay uint, args interface{}) {
-	gro.backend.publishJob(PrepareParameters(&JobParams{
+	gro.backend.publishJob(prepareParameters(&JobParams{
 		Name:      jobtitle,
 		Arguments: args,
 		Delay:     delay,
@@ -39,9 +40,10 @@ func (gro *Client) SendWithDelay(jobtitle string, delay uint, args interface{}) 
 
 //SendWithPeriod provides starting periodic task execution
 func (gro *Client) SendWithPeriod(jobtitle string, sec uint, args interface{}) {
-	gro.backend.publishJob(PrepareParameters(&JobParams{
+	gro.backend.publishJob(prepareParameters(&JobParams{
 		Name:      jobtitle,
 		Arguments: args,
 		Period:    sec,
 	}))
 }
+

@@ -12,7 +12,8 @@ type JobParams struct {
 	Period    uint
 }
 
-func GetJobArguments(item string) JobParams {
+
+func getJobArguments(item string) JobParams {
 	var params JobParams
 	err := json.Unmarshal([]byte(item), &params)
 	if err != nil {
@@ -22,7 +23,7 @@ func GetJobArguments(item string) JobParams {
 	return params
 }
 
-func PrepareParameters(jp *JobParams) string {
+func prepareParameters(jp *JobParams) string {
 	results, err := json.Marshal(jp)
 	if err != nil {
 		panic(err)

@@ -103,7 +103,7 @@ func (worker *Worker) start() {
 			switch msg := reply.(type) {
 			case *redis.Message:
 				jobobject := msg.Payload
-				job := GetJobArguments(jobobject)
+				job := getJobArguments(jobobject)
 				if !worker.CheckJob(job.Name) {
 					log.Printf(fmt.Sprintf("Job %s not found", job.Name))
 				} else {
