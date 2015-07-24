@@ -18,15 +18,15 @@ type funcargint func(int) interface{}
 type funcargsstring func(string) interface{}
 
 type Worker struct {
-	queues  map[string]*Queue
-	jobs    map[string]*Job
-	host    string
-	port    uint
-	stop    bool
+	queues map[string]*Queue
+	jobs   map[string]*Job
+	host   string
+	port   uint
+	stop   bool
 	//Backend provides comunications with redis
 	Backend *RedisBackend
+	dbstore *redis.Client
 }
-
 
 //CreateWorker provides initialization of worker
 func CreateWorker(host string, port uint) *Worker {
@@ -38,6 +38,7 @@ func CreateWorker(host string, port uint) *Worker {
 	worker.Backend = InitRedisBackend()
 	worker.AddQueue("default")
 	worker.jobs = map[string]*Job{}
+	worker.dbstore = initRedis("localhost:6379")
 	return worker
 }
 
@@ -112,19 +113,25 @@ func (worker *Worker) start() {
 					log.Printf(fmt.Sprintf("Job %s not found", job.Name))
 				} else {
 					targetjob := worker.jobs[job.Name]
-					if job.Delay > 0 {
-						targetjob.RunWithDelay(job.Arguments, job.Delay)
-					} else if job.Period > 0 {
-						targetjob.RunEvery(job.Arguments, job.Period)
-					} else {
-						targetjob.Run(job.Arguments)
-					}
+					worker.RunNewJob(targetjob, job)
 				}
 
 			}
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
+}
+
+func (worker *Worker) RunNewJob(tj *Job, jp JobParams) {
+	go func(targetjob *Job, job JobParams) {
+		if job.Delay > 0 {
+			targetjob.RunWithDelay(job.Arguments, job.Delay)
+		} else if job.Period > 0 {
+			targetjob.RunEvery(job.Arguments, job.Period)
+		} else {
+			targetjob.Run(job.Arguments)
+		}
+	}(tj, jp)
 }
 
 func (worker *Worker) Stop() {
