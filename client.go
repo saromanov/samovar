@@ -1,9 +1,12 @@
 package samovar
 
-import ()
+import (
+	"gopkg.in/redis.v3"
+)
 
 type Client struct {
 	backend *RedisBackend
+	client  *redis.Client
 }
 
 type JobOptions struct {
@@ -18,6 +21,7 @@ type JobOptions struct {
 func InitClient() *Client {
 	client := new(Client)
 	client.backend = InitRedisBackend()
+	client.client = initRedis("localhost:6379")
 	return client
 }
 
@@ -47,3 +51,6 @@ func (gro *Client) SendWithPeriod(jobtitle string, sec uint, args interface{}) {
 	}))
 }
 
+func (gro *Client) GetResult(title string) interface{} {
+	return gro.client.HGet("samovar", title)
+}

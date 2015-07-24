@@ -24,8 +24,9 @@ type Worker struct {
 	port   uint
 	stop   bool
 	//Backend provides comunications with redis
-	Backend *RedisBackend
-	dbstore *redis.Client
+	Backend  *RedisBackend
+	dbstore  *redis.Client
+	jobqueue []*Job
 }
 
 //CreateWorker provides initialization of worker
@@ -39,6 +40,7 @@ func CreateWorker(host string, port uint) *Worker {
 	worker.AddQueue("default")
 	worker.jobs = map[string]*Job{}
 	worker.dbstore = initRedis("localhost:6379")
+	worker.jobqueue = []*Job{}
 	return worker
 }
 
@@ -123,6 +125,7 @@ func (worker *Worker) start() {
 }
 
 func (worker *Worker) RunNewJob(tj *Job, jp JobParams) {
+	worker.jobqueue = append(worker.jobqueue, tj)
 	go func(targetjob *Job, job JobParams) {
 		if job.Delay > 0 {
 			targetjob.RunWithDelay(job.Arguments, job.Delay)
@@ -131,7 +134,32 @@ func (worker *Worker) RunNewJob(tj *Job, jp JobParams) {
 		} else {
 			targetjob.Run(job.Arguments)
 		}
+
 	}(tj, jp)
+
+	//Catch and write results from the job tj
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			for _, jname := range worker.jobqueue {
+				if jname.IsDone() {
+					idx := 0
+					for i, pname := range worker.jobqueue {
+						if pname.Title == jname.Title{
+							idx = i
+							break
+						}
+					}
+					worker.jobqueue = append(worker.jobqueue[:idx], worker.jobqueue[idx+1:]...)
+					result := Result {
+						Title: jname.Title,
+						Result: jname.getResult(),
+					}
+					result.storeResult(worker.dbstore)
+				}
+			}
+		}
+	}()
 }
 
 func (worker *Worker) Stop() {
