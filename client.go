@@ -54,5 +54,6 @@ func (gro *Client) SendWithPeriod(jobtitle string, sec uint, args interface{}) {
 
 //GetResult provides non-async version if getting results from the job
 func (gro *Client) GetResult(title string) interface{} {
-	return gro.client.HGet("samovar", title)
+	return getResult(gro.client, title)
 }
+

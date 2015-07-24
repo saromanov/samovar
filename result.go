@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"gopkg.in/redis.v3"
 	"time"
+	"log"
+	"fmt"
 )
 
 type Result struct {
@@ -20,4 +22,18 @@ func (res *Result) storeResult(client *redis.Client) {
 	}
 
 	client.HSet("samovar", res.Title, string(results))
+}
+
+func getResult(client *redis.Client, title string) interface{} {
+	var res Result
+	result, err := client.HGet("samovar", title).Result()
+	if err != nil {
+		log.Printf(fmt.Sprintf("Job by title %s not found", title))
+	}
+	errunm := json.Unmarshal([]byte(result), &res)
+	if errunm != nil {
+		panic(err)
+	}
+	return res.Result
+
 }
