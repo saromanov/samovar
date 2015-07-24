@@ -23,9 +23,12 @@ type Worker struct {
 	host    string
 	port    uint
 	stop    bool
+	//Backend provides comunications with redis
 	Backend *RedisBackend
 }
 
+
+//CreateWorker provides initialization of worker
 func CreateWorker(host string, port uint) *Worker {
 	worker := new(Worker)
 	worker.host = host
@@ -42,6 +45,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
 }
 
+//StartWorker provides start server
 func (work *Worker) StartWorker() {
 	log.Printf("Start worker:")
 	work.start()
