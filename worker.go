@@ -30,7 +30,7 @@ type Worker struct {
 }
 
 //CreateWorker provides initialization of worker
-func CreateWorker(host string, port uint) *Worker {
+func createWorker(host string, port uint) *Worker {
 	worker := new(Worker)
 	worker.host = host
 	worker.port = port

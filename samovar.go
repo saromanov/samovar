@@ -38,6 +38,6 @@ func (gro *Samovar) CreateWorker(opt *SamovarOptions) *Worker {
 		host = "localhost"
 		port = 8080
 	}
-	gro.worker = CreateWorker(host, port)
+	gro.worker = createWorker(host, port)
 	return gro.worker
 }
