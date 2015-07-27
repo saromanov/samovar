@@ -30,10 +30,10 @@ type Worker struct {
 }
 
 //CreateWorker provides initialization of worker
-func createWorker(host string, port uint) *Worker {
+func createWorker(opt *SamovarOptions) *Worker {
 	worker := new(Worker)
-	worker.host = host
-	worker.port = port
+	worker.host = opt.host
+	worker.port = opt.port
 	worker.queues = map[string]*Queue{}
 	log.Println("initialize default queue")
 	worker.Backend = InitRedisBackend()
