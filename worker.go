@@ -140,7 +140,7 @@ func (worker *Worker) RunNewJob(tj *Job, jp JobParams) {
 	//Catch and write results from the job tj
 	go func() {
 		for {
-			time.Sleep(1 * time.Second)
+			time.Sleep(100 * time.Millisecond)
 			for _, jname := range worker.jobqueue {
 				if jname.IsDone() {
 					idx := 0
