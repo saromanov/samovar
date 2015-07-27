@@ -43,10 +43,12 @@ func (backend *RedisBackend) registerQueue(queuename string) {
 	backend.subscribe(queuename)
 }
 
-func (backend *RedisBackend) ReceiveMessages() (interface{}, error) {
+//Receive messages from backend
+func (backend *RedisBackend) receiveMessages() (interface{}, error) {
 	return backend.pubsub.ReceiveTimeout(100 * time.Millisecond)
 }
 
+//subscribe to the new channel
 func (backend *RedisBackend) subscribe(queuename string) {
 	err := backend.pubsub.Subscribe(fmt.Sprintf("%s_%s", TITLE, queuename))
 	if err != nil {
@@ -54,6 +56,7 @@ func (backend *RedisBackend) subscribe(queuename string) {
 	}
 }
 
+//Publish new hob
 func (backend *RedisBackend) publishJob(jobtitle string) {
 	err := backend.client.Publish(fmt.Sprintf("%s_%s", TITLE, "default"), jobtitle).Err()
 	if err != nil {
