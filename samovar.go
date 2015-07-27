@@ -11,6 +11,13 @@ type Samovar struct {
 	client *Client
 }
 
+//SamovarOptions provides options for the worker
+type SamovarOptions struct {
+	Queues []string
+	host   string
+	port   uint
+}
+
 //Init provides initialization of basic object
 func Init() *Samovar {
 	gro := new(Samovar)
@@ -24,7 +31,13 @@ func (gro *Samovar) CreateClient() *Client {
 }
 
 //CreateWorker provides initialization of the worker
-func (gro *Samovar) CreateWorker(host string, port uint) *Worker {
+func (gro *Samovar) CreateWorker(opt *SamovarOptions) *Worker {
+	host := opt.host
+	port := opt.port
+	if opt.host == "" && opt.port == 0 {
+		host = "localhost"
+		port = 8080
+	}
 	gro.worker = CreateWorker(host, port)
 	return gro.worker
 }
