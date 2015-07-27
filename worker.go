@@ -32,12 +32,21 @@ type Worker struct {
 //CreateWorker provides initialization of worker
 func createWorker(opt *SamovarOptions) *Worker {
 	worker := new(Worker)
-	worker.host = opt.host
-	worker.port = opt.port
+	worker.host = opt.Host
+	worker.port = opt.Port
 	worker.queues = map[string]*Queue{}
 	log.Println("initialize default queue")
 	worker.Backend = InitRedisBackend()
-	worker.AddQueue("default")
+	if len(opt.Queues) != 0 {
+		for _, qname := range opt.Queues {
+			worker.AddQueue(qname)
+		}
+	}
+
+	if !opt.NotDefaultQueue {
+		worker.AddQueue("default")
+	}
+
 	worker.jobs = map[string]*Job{}
 	worker.dbstore = initRedis("localhost:6379")
 	worker.jobqueue = []*Job{}
