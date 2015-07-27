@@ -101,7 +101,7 @@ func (worker *Worker) start() {
 	go func() {
 		for {
 
-			reply, err := backend.ReceiveMessages()
+			reply, err := backend.receiveMessages()
 			//Get next job
 			if err != nil {
 
@@ -145,14 +145,14 @@ func (worker *Worker) RunNewJob(tj *Job, jp JobParams) {
 				if jname.IsDone() {
 					idx := 0
 					for i, pname := range worker.jobqueue {
-						if pname.Title == jname.Title{
+						if pname.Title == jname.Title {
 							idx = i
 							break
 						}
 					}
 					worker.jobqueue = append(worker.jobqueue[:idx], worker.jobqueue[idx+1:]...)
-					result := Result {
-						Title: jname.Title,
+					result := Result{
+						Title:  jname.Title,
 						Result: jname.getResult(),
 					}
 					result.storeResult(worker.dbstore)
