@@ -80,6 +80,7 @@ func (work *Worker) CheckJob(title string) bool {
 
 //This method provides creation of new job queue
 func (work *Worker) AddQueue(title string) {
+	log.Printf(fmt.Sprintf("Create queue %s", title))
 	work.queues[title] = CreateQueue(title)
 	work.Backend.registerQueue(title)
 }
