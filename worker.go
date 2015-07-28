@@ -68,7 +68,7 @@ func (work *Worker) StartWorker() {
 
 //AddJob provides registration of the new job
 func (work *Worker) AddJob(title string, fn funcarg) {
-	log.Println("Create new job")
+	log.Println(fmt.Sprintf("Register new job: %s", title))
 	work.jobs[title] = CreateJob(title, fn)
 }
 
