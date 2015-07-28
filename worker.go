@@ -35,7 +35,6 @@ func createWorker(opt *SamovarOptions) *Worker {
 	worker.host = opt.Host
 	worker.port = opt.Port
 	worker.queues = map[string]*Queue{}
-	log.Println("initialize default queue")
 	worker.Backend = InitRedisBackend()
 	if len(opt.Queues) != 0 {
 		for _, qname := range opt.Queues {
@@ -44,6 +43,7 @@ func createWorker(opt *SamovarOptions) *Worker {
 	}
 
 	if !opt.NotDefaultQueue {
+		log.Println("initialize default queue")
 		worker.AddQueue("default")
 	}
 
