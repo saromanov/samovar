@@ -15,6 +15,7 @@ type JobOptions struct {
 	Delay     uint
 	Period    uint
 	Priority  uint
+	Queue     string
 }
 
 //Init client provides initialization of samovar client
@@ -30,7 +31,7 @@ func (gro *Client) Send(jobtitle string, opt *JobOptions) {
 	gro.backend.publishJob(prepareParameters(&JobParams{
 		Name:      jobtitle,
 		Arguments: opt.Arguments,
-	}))
+	}), resolveQueueName(opt.Queue))
 }
 
 //SendWithDelay provides sending arguments to job with delay
@@ -39,7 +40,7 @@ func (gro *Client) SendWithDelay(jobtitle string, delay uint, args interface{}) 
 		Name:      jobtitle,
 		Arguments: args,
 		Delay:     delay,
-	}))
+	}), "default")
 }
 
 //SendWithPeriod provides starting periodic task execution
@@ -48,12 +49,17 @@ func (gro *Client) SendWithPeriod(jobtitle string, sec uint, args interface{}) {
 		Name:      jobtitle,
 		Arguments: args,
 		Period:    sec,
-	}))
+	}), "default")
 }
-
 
 //GetResult provides non-async version if getting results from the job
 func (gro *Client) GetResult(title string) interface{} {
 	return getResult(gro.client, title)
 }
 
+func resolveQueueName(title string) string {
+	if title == "" {
+		return "default"
+	}
+	return title
+}
