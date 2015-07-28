@@ -61,6 +61,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func (work *Worker) StartWorker() {
 	log.Printf("Start worker:")
 	work.start()
+	detectExit()
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":8080", nil)
 
@@ -119,6 +120,7 @@ func (worker *Worker) start() {
 			//Need to process new job
 			switch msg := reply.(type) {
 			case *redis.Message:
+				//fmt.Println(msg)
 				jobobject := msg.Payload
 				job := getJobArguments(jobobject)
 				if !worker.CheckJob(job.Name) {
@@ -160,7 +162,10 @@ func (worker *Worker) RunNewJob(tj *Job, jp JobParams) {
 							break
 						}
 					}
-					worker.jobqueue = append(worker.jobqueue[:idx], worker.jobqueue[idx+1:]...)
+					if len(worker.jobqueue) > 0 {
+						worker.jobqueue = append(worker.jobqueue[:idx], worker.jobqueue[idx+1:]...)
+					}
+					
 					result := Result{
 						Title:  jname.Title,
 						Result: jname.getResult(),
