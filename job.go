@@ -16,6 +16,7 @@ type Job struct {
 	//Number of times which job was call
 	numberofcalls int
 	done          bool
+	started       bool
 	lock          *sync.Mutex
 	options       Options
 	//delay in seconds
@@ -75,6 +76,7 @@ func (j *Job) Run(arguments interface{}) {
 	j.jobRun(arguments)
 }
 
+//IsDone provides checking of current job is done
 func (j *Job) IsDone() bool {
 	return j.done
 }
@@ -83,7 +85,9 @@ func (j *Job) IsDone() bool {
 func (j *Job) jobRun(arguments interface{}) {
 	go func() {
 		starttime := time.Now().UnixNano()
+		j.started = true
 		j.result = j.Data(arguments)
+		j.started = false
 		j.done = true
 		j.executionTime = time.Now().UnixNano() - starttime
 		j.lock.Lock()
