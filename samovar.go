@@ -1,10 +1,5 @@
 package samovar
 
-const (
-	//Default queue name
-	defqueue = "default"
-)
-
 type Samovar struct {
 	queues map[string]*Queue
 	worker *Worker
