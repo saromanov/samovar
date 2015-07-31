@@ -53,9 +53,6 @@ func createWorker(opt *SamovarOptions) *Worker {
 	return worker
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-}
 
 //StartWorker provides start server
 func (work *Worker) StartWorker() {
@@ -137,6 +134,8 @@ func (worker *Worker) start() {
 }
 
 func (worker *Worker) RunNewJob(tj *Job, jp JobParams) {
+
+	//This need to move to the queue
 	worker.jobqueue = append(worker.jobqueue, tj)
 	go func(targetjob *Job, job JobParams) {
 		if job.Delay > 0 {
@@ -165,7 +164,7 @@ func (worker *Worker) RunNewJob(tj *Job, jp JobParams) {
 					if len(worker.jobqueue) > 0 {
 						worker.jobqueue = append(worker.jobqueue[:idx], worker.jobqueue[idx+1:]...)
 					}
-					
+
 					result := Result{
 						Title:  jname.Title,
 						Result: jname.getResult(),
