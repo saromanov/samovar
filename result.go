@@ -2,16 +2,16 @@ package samovar
 
 import (
 	"encoding/json"
-	"gopkg.in/redis.v3"
-	"time"
-	"log"
 	"fmt"
+	"gopkg.in/redis.v3"
+	"log"
+	"time"
 )
 
 type Result struct {
 	Title  string
 	Result interface{}
-	Date   *time.Time
+	Date   time.Time
 }
 
 //Store result provides write function result to db
@@ -34,6 +34,6 @@ func getResult(client *redis.Client, title string) interface{} {
 	if errunm != nil {
 		panic(err)
 	}
-	return res.Result
+	return res
 
 }
