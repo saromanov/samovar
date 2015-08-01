@@ -85,6 +85,7 @@ func (q *Queue) Process() {
 					result := Result{
 						Title:  job.Title,
 						Result: job.getResult(),
+						Date: time.Now(),
 					}
 					result.storeResult(q.dbstore)
 				}
