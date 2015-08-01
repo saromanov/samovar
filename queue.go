@@ -3,6 +3,9 @@ package samovar
 import (
 	"time"
 	"gopkg.in/redis.v3"
+	"encoding/json"
+	"log"
+	"fmt"
 )
 
 //Options for queue
@@ -82,10 +85,16 @@ func (q *Queue) Process() {
 						q.jobs = append(q.jobs[:idx], q.jobs[idx+1:]...)
 					}
 
+					resultitem := job.getResult()
+					res, err := json.Marshal(resultitem)
+					if err != nil {
+						log.Fatal(fmt.Sprintf("Can't get checksum from resut of %s", job.Title))
+					}
 					result := Result{
 						Title:  job.Title,
-						Result: job.getResult(),
+						Result: resultitem,
 						Date: time.Now(),
+						DataChecksum: getChecksum(res),
 					}
 					result.storeResult(q.dbstore)
 				}

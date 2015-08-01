@@ -6,12 +6,14 @@ import (
 	"gopkg.in/redis.v3"
 	"log"
 	"time"
+	"hash/crc32"
 )
 
 type Result struct {
 	Title  string
 	Result interface{}
 	Date   time.Time
+	DataChecksum uint32
 }
 
 //Store result provides write function result to db
@@ -36,4 +38,10 @@ func getResult(client *redis.Client, title string) interface{} {
 	}
 	return res
 
+}
+
+func getChecksum(item []byte) uint32 {
+	crc := crc32.New(crc32.MakeTable(crc32.Castagnoli))
+    crc.Write([]byte(item))
+    return crc.Sum32()
 }
