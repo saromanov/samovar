@@ -25,7 +25,6 @@ type Worker struct {
 	stop   bool
 	//Backend provides comunications with redis
 	Backend  *RedisBackend
-	dbstore  *redis.Client
 	jobqueue []*Job
 }
 
@@ -48,18 +47,15 @@ func createWorker(opt *SamovarOptions) *Worker {
 	}
 
 	worker.jobs = map[string]*Job{}
-	worker.dbstore = initRedis("localhost:6379")
 	worker.jobqueue = []*Job{}
 	return worker
 }
-
 
 //StartWorker provides start server
 func (work *Worker) StartWorker() {
 	log.Printf("Start worker:")
 	work.start()
 	detectExit()
-	http.HandleFunc("/", handler)
 	http.ListenAndServe(":8080", nil)
 
 }
@@ -117,14 +113,13 @@ func (worker *Worker) start() {
 			//Need to process new job
 			switch msg := reply.(type) {
 			case *redis.Message:
-				//fmt.Println(msg)
 				jobobject := msg.Payload
 				job := getJobArguments(jobobject)
 				if !worker.CheckJob(job.Name) {
 					log.Printf(fmt.Sprintf("Job %s not found", job.Name))
 				} else {
 					targetjob := worker.jobs[job.Name]
-					worker.RunNewJob(targetjob, job)
+					worker.RunNewJob(msg.Channel, targetjob, job)
 				}
 
 			}
@@ -133,47 +128,13 @@ func (worker *Worker) start() {
 	}()
 }
 
-func (worker *Worker) RunNewJob(tj *Job, jp JobParams) {
-
-	//This need to move to the queue
-	worker.jobqueue = append(worker.jobqueue, tj)
-	go func(targetjob *Job, job JobParams) {
-		if job.Delay > 0 {
-			targetjob.RunWithDelay(job.Arguments, job.Delay)
-		} else if job.Period > 0 {
-			targetjob.RunEvery(job.Arguments, job.Period)
-		} else {
-			targetjob.Run(job.Arguments)
-		}
-
-	}(tj, jp)
-
-	//Catch and write results from the job tj
-	go func() {
-		for {
-			time.Sleep(100 * time.Millisecond)
-			for _, jname := range worker.jobqueue {
-				if jname.IsDone() {
-					idx := 0
-					for i, pname := range worker.jobqueue {
-						if pname.Title == jname.Title {
-							idx = i
-							break
-						}
-					}
-					if len(worker.jobqueue) > 0 {
-						worker.jobqueue = append(worker.jobqueue[:idx], worker.jobqueue[idx+1:]...)
-					}
-
-					result := Result{
-						Title:  jname.Title,
-						Result: jname.getResult(),
-					}
-					result.storeResult(worker.dbstore)
-				}
-			}
-		}
-	}()
+func (worker *Worker) RunNewJob(queuename string, tj *Job, jp JobParams) {
+	queue, ok := worker.queues[queuename]
+	if !ok {
+		log.Printf(fmt.Sprintf("Error: queue with the name %s is not found", queuename))
+	} else {
+		queue.Put(tj, jp)
+	}
 }
 
 func (worker *Worker) Stop() {
