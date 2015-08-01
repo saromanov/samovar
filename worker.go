@@ -75,17 +75,17 @@ func (work *Worker) CheckJob(title string) bool {
 //This method provides creation of new job queue
 func (work *Worker) AddQueue(title string) {
 	log.Printf(fmt.Sprintf("Create queue %s", title))
-	work.queues[title] = CreateQueue(title)
+	work.registerQueue(title)
 	work.Backend.registerQueue(title)
 }
 
 func (work *Worker) registerQueue(title string) {
-	//Нужно оставить только subscrube
-	_, ok := work.queues[title]
+	queuename := "samovar_" + title
+	_, ok := work.queues[queuename]
 	if ok {
 		log.Printf(fmt.Sprintf("Queue with title %s already exist", title))
 	} else {
-		work.queues[title] = CreateQueue(title)
+		work.queues[queuename] = CreateQueue(queuename)
 		msg := fmt.Sprintf("Queue %s was created", title)
 		work.Backend.subscribe(title)
 		log.Print(msg)
