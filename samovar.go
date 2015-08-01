@@ -8,9 +8,9 @@ type Samovar struct {
 
 //SamovarOptions provides options for the worker
 type SamovarOptions struct {
-	Queues       []string
-	Host         string
-	Port         uint
+	Queues          []string
+	Host            string
+	Port            uint
 	NotDefaultQueue bool
 }
 
