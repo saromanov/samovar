@@ -86,6 +86,7 @@ func (work *Worker) registerQueue(title string) {
 		log.Printf(fmt.Sprintf("Queue with title %s already exist", title))
 	} else {
 		work.queues[queuename] = CreateQueue(queuename)
+		work.queues[queuename].Process()
 		msg := fmt.Sprintf("Queue %s was created", title)
 		work.Backend.subscribe(title)
 		log.Print(msg)
