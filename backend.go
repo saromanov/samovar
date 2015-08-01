@@ -58,6 +58,7 @@ func (backend *RedisBackend) subscribe(queuename string) {
 
 //Publish new hob
 func (backend *RedisBackend) publishJob(jobtitle string, queuename string) {
+	fmt.Println(fmt.Sprintf("%s_%s", TITLE, queuename))
 	err := backend.client.Publish(fmt.Sprintf("%s_%s", TITLE, queuename), jobtitle).Err()
 	if err != nil {
 		panic(err)
