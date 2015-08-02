@@ -19,14 +19,16 @@ type funcargsstring func(string) interface{}
 
 type Worker struct {
 	queues map[string]*Queue
-	jobs   map[string]*Job
+	//jobs   map[string]*Job
 	host   string
 	port   uint
 	stop   bool
 	//Backend provides comunications with redis
 	Backend  *RedisBackend
 	jobqueue []*Job
+	jobs     *Jobs
 }
+
 
 //CreateWorker provides initialization of worker
 func createWorker(opt *SamovarOptions) *Worker {
@@ -46,7 +48,9 @@ func createWorker(opt *SamovarOptions) *Worker {
 		worker.AddQueue("default")
 	}
 
-	worker.jobs = map[string]*Job{}
+	worker.jobs = &Jobs{
+		jobs: map[string]*Job{},
+	}
 	worker.jobqueue = []*Job{}
 	return worker
 }
@@ -63,13 +67,20 @@ func (work *Worker) StartWorker() {
 //AddJob provides registration of the new job
 func (work *Worker) AddJob(title string, fn funcarg) {
 	log.Println(fmt.Sprintf("Register new job: %s", title))
-	work.jobs[title] = CreateJob(title, fn)
+	var reply bool
+	err := work.jobs.AppendJob(title, CreateJob(title, fn), &reply)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 //CheckJob provides checking job by title in store
 func (work *Worker) CheckJob(title string) bool {
-	_, ok := work.jobs[title]
-	return ok
+	err := work.jobs.GetJob(title, nil)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 //This method provides creation of new job queue
@@ -119,8 +130,12 @@ func (worker *Worker) start() {
 				if !worker.CheckJob(job.Name) {
 					log.Printf(fmt.Sprintf("Job %s not found", job.Name))
 				} else {
-					targetjob := worker.jobs[job.Name]
-					worker.RunNewJob(msg.Channel, targetjob, job)
+					var targetjob Job
+					err := worker.jobs.GetJob(job.Name, &targetjob)
+					if err != nil {
+						log.Fatal(err)
+					}
+					worker.RunNewJob(msg.Channel, &targetjob, job)
 				}
 
 			}
