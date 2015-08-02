@@ -2,6 +2,11 @@ package samovar
 
 import (
 	"gopkg.in/redis.v3"
+	"time"
+	"net"
+	"net/rpc"
+	"log"
+	"fmt"
 )
 
 type Client struct {
@@ -57,9 +62,32 @@ func (gro *Client) GetResult(title string) interface{} {
 	return getResult(gro.client, title)
 }
 
+//GetStat provides statistics for the job with title
+func (gro *Client) GetJobItem(title string) {
+	callAsRPC("Jobs.GetJob", title)
+}
+
 func resolveQueueName(title string) string {
 	if title == "" {
 		return "default"
 	}
 	return title
+}
+
+func callAsRPC(name, title string) {
+	timeout := time.Duration(100) * time.Millisecond
+
+	item, err := net.DialTimeout("tcp", ADDR, timeout)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	connection := rpc.NewClient(item)
+	var job Job
+	errcall := connection.Call(name, title, &job)
+	if errcall != nil {
+		log.Fatal(errcall)
+	}
+
+	fmt.Println(job)
 }
