@@ -51,6 +51,8 @@ func createWorker(opt *SamovarOptions) *Worker {
 	worker.jobs = &Jobs{
 		jobs: map[string]*Job{},
 	}
+	RegisterRPCFunction(worker.jobs)
+	go InitRPC("").Run()
 	worker.jobqueue = []*Job{}
 	return worker
 }
