@@ -16,12 +16,12 @@ type Job struct {
 	//Number of times which job was call
 	numberofcalls int
 	done          bool
-	started       bool
+	started       chan bool
 	lock          *sync.Mutex
 	options       Options
 	//delay in seconds
 	delay         time.Duration
-	result        interface{}
+	result        chan interface{}
 	executionTime int64
 }
 
@@ -38,6 +38,8 @@ func CreateJob(title string, fn funcarg) *Job {
 	job.Id = _generateid()
 	job.numberofcalls = 0
 	job.delay = 0
+	job.started = make(chan bool)
+	job.result = make(chan interface{})
 	job.lock = &sync.Mutex{}
 	return job
 }
@@ -83,15 +85,15 @@ func (j *Job) IsDone() bool {
 
 //Run current job with arguments
 func (j *Job) jobRun(arguments interface{}) {
+	j.numberofcalls++
 	go func() {
 		starttime := time.Now().UnixNano()
-		j.started = true
-		j.result = j.Data(arguments)
-		j.started = false
+		//j.started <- true
+		j.result <- j.Data(arguments)
+		//j.started <- false
 		j.done = true
 		j.executionTime = time.Now().UnixNano() - starttime
 		j.lock.Lock()
-		j.numberofcalls++
 		j.lock.Unlock()
 	}()
 }
