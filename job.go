@@ -72,6 +72,16 @@ func (j *Job) RunEvery(arguments interface{}, sec uint) {
 	}()
 }
 
+//RunTimes provides running of job t n times with delay sec
+func (j *Job) RunTimes(arguments interface{}, sec uint, times uint) {
+	go func() {
+		for i := 0; i < times; i++ {
+			time.Sleep(time.Duration(sec) * time.Second)
+			j.Run(arguments)
+		}
+	}()
+}
+
 //This method provides basic run of the job
 func (j *Job) Run(arguments interface{}) {
 	fmt.Println(fmt.Sprintf("Start to processing %s", j.Title))
