@@ -73,7 +73,7 @@ func (j *Job) RunEvery(arguments interface{}, sec uint) {
 }
 
 //RunTimes provides running of job t n times with delay sec
-func (j *Job) RunTimes(arguments interface{}, sec uint, times uint) {
+func (j *Job) RunTimes(arguments interface{}, sec uint, times int) {
 	go func() {
 		for i := 0; i < times; i++ {
 			time.Sleep(time.Duration(sec) * time.Second)
