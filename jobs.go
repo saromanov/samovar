@@ -13,6 +13,7 @@ type Jobs struct {
 }
 
 
+//GetJob provides getting job by title
 func (j*Jobs) GetJob(title string, job *Job) error {
 	currentjob, ok := j.jobs[title]
 	if !ok {
