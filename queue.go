@@ -84,6 +84,12 @@ func (q *Queue) Process() {
 					if len(q.jobs) > 0 {
 						q.jobs = append(q.jobs[:idx], q.jobs[idx+1:]...)
 					}
+					info := Info {
+						Title: job.Title,
+						Status: 1,
+					}
+
+					info.storeInfo(q.dbstore)
 
 					resultitem := job.getResult()
 					res, err := json.Marshal(resultitem)
@@ -97,6 +103,12 @@ func (q *Queue) Process() {
 						DataChecksum: getChecksum(res),
 					}
 					result.storeResult(q.dbstore)
+					info = Info {
+						Title: job.Title,
+						Status: 0,
+					}
+
+					info.storeInfo(q.dbstore)
 				}
 			}
 
