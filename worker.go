@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/redis.v3"
 	"log"
-	"net/http"
+	//"net/http"
 	"time"
 )
 
@@ -12,23 +12,18 @@ const (
 	QUEUENAME = "samowar1"
 )
 
-//Function argument to job
-type funcarg func(interface{}) interface{}
-type funcargint func(int) interface{}
-type funcargsstring func(string) interface{}
 
 type Worker struct {
 	queues map[string]*Queue
 	//jobs   map[string]*Job
-	host   string
-	port   uint
-	stop   bool
+	host string
+	port uint
+	stop bool
 	//Backend provides comunications with redis
 	Backend  *RedisBackend
 	jobqueue []*Job
 	jobs     *Jobs
 }
-
 
 //CreateWorker provides initialization of worker
 func createWorker(opt *SamovarOptions) *Worker {
@@ -51,8 +46,6 @@ func createWorker(opt *SamovarOptions) *Worker {
 	worker.jobs = &Jobs{
 		jobs: map[string]*Job{},
 	}
-	RegisterRPCFunction(worker.jobs)
-	go InitRPC("").Run()
 	worker.jobqueue = []*Job{}
 	return worker
 }
@@ -62,27 +55,19 @@ func (work *Worker) StartWorker() {
 	log.Printf("Start worker:")
 	work.start()
 	detectExit()
-	http.ListenAndServe(":8080", nil)
+	//InitRPC("").Run()
+	StartServer(work.jobs)
 
 }
 
 //AddJob provides registration of the new job
-func (work *Worker) AddJob(title string, fn funcarg) {
+func (work *Worker) AddJob(title string, fn interface{}) {
 	log.Println(fmt.Sprintf("Register new job: %s", title))
 	var reply bool
 	err := work.jobs.AppendJob(title, CreateJob(title, fn), &reply)
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-//CheckJob provides checking job by title in store
-func (work *Worker) CheckJob(title string) bool {
-	err := work.jobs.GetJob(title, nil)
-	if err != nil {
-		return false
-	}
-	return true
 }
 
 //This method provides creation of new job queue
@@ -127,18 +112,15 @@ func (worker *Worker) start() {
 			//Need to process new job
 			switch msg := reply.(type) {
 			case *redis.Message:
+				RegisterRPCFunction(worker.jobs)
 				jobobject := msg.Payload
 				job := getJobArguments(jobobject)
-				if !worker.CheckJob(job.Name) {
-					log.Printf(fmt.Sprintf("Job %s not found", job.Name))
-				} else {
-					var targetjob Job
-					err := worker.jobs.GetJob(job.Name, &targetjob)
-					if err != nil {
-						log.Fatal(err)
-					}
-					worker.RunNewJob(msg.Channel, &targetjob, job)
+				var targetjob Job
+				err := worker.jobs.GetJob(job.Name, &targetjob)
+				if err != nil {
+					log.Fatal(err)
 				}
+				worker.RunNewJob(msg.Channel, &targetjob, job)
 
 			}
 			time.Sleep(100 * time.Millisecond)
