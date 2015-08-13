@@ -10,7 +10,7 @@ import
 
 func StartServer(jobs *Jobs) {
 	r := mux.NewRouter()
-	r.HandleFunc("/job/{title}", func(w http.ResponseWriter, req *http.Request){
+	r.HandleFunc("/statjob/{title}", func(w http.ResponseWriter, req *http.Request){
 		title := mux.Vars(req)["title"]
 		var job Job
 		err := jobs.GetJob(title, &job)
