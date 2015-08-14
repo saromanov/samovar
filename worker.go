@@ -112,7 +112,6 @@ func (worker *Worker) start() {
 			//Need to process new job
 			switch msg := reply.(type) {
 			case *redis.Message:
-				RegisterRPCFunction(worker.jobs)
 				jobobject := msg.Payload
 				job := getJobArguments(jobobject)
 				var targetjob Job
