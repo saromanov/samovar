@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"errors"
 )
 
 type Job struct {
@@ -22,7 +23,7 @@ type Job struct {
 	options       Options
 	//delay in seconds
 	delay         time.Duration
-	result        chan interface{}
+	result        interface{}
 	executionTime int64
 }
 
@@ -113,8 +114,12 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 	go func() {
 		starttime := time.Now().UnixNano()
 		//j.started <- true
-		j.result <- reflect.ValueOf(j.Data).Call(arguments)
-		fmt.Println(<-j.result)
+		result := reflect.ValueOf(j.Data).Call(arguments)
+		if len(result) > 0 {
+			j.result = result
+		} else {
+			j.result = nil
+		}
 		//j.started <- false
 		j.done = true
 		j.executionTime = time.Now().UnixNano() - starttime
@@ -123,6 +128,9 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 	}()
 }
 
-func (j *Job) getResult() interface{} {
-	return j.result
+func (j *Job) getResult() (interface{}, error) {
+	if j.result == nil {
+		return nil, errors.New("Task not contain return value")
+	}
+	return j.result, nil
 }

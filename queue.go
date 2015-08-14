@@ -1,16 +1,15 @@
 package samovar
 
 import (
-	"time"
-	"gopkg.in/redis.v3"
 	"encoding/json"
-	"log"
 	"fmt"
+	"gopkg.in/redis.v3"
+	"log"
+	"time"
 )
 
 //Options for queue
 type QueueOptions struct {
-
 }
 
 //This queue provides basic data structure
@@ -19,7 +18,7 @@ type Queue struct {
 	title   string
 	limit   int
 	options *QueueOptions
-	dbstore  *redis.Client
+	dbstore *redis.Client
 }
 
 func CreateQueue(title string) *Queue {
@@ -84,27 +83,31 @@ func (q *Queue) Process() {
 					if len(q.jobs) > 0 {
 						q.jobs = append(q.jobs[:idx], q.jobs[idx+1:]...)
 					}
-					info := Info {
-						Title: job.Title,
+					info := Info{
+						Title:  job.Title,
 						Status: 1,
 					}
 
 					info.storeInfo(q.dbstore)
 
-					resultitem := job.getResult()
-					res, err := json.Marshal(resultitem)
-					if err != nil {
-						log.Fatal(fmt.Sprintf("Can't get checksum from resut of %s", job.Title))
-					}
+					resultitem, err := job.getResult()
 					result := Result{
-						Title:  job.Title,
-						Result: resultitem,
-						Date: time.Now(),
-						DataChecksum: getChecksum(res),
+						Title:        job.Title,
+						Date:         time.Now(),
 					}
+					//Serialize result, in the case if task contain result value
+					if err == nil {
+						res, err := json.Marshal(resultitem)
+						if err != nil {
+							log.Fatal(fmt.Sprintf("Can't get checksum from resut of %s", job.Title))
+						}
+						result.Result = resultitem
+						result.DataChecksum = getChecksum(res)
+					}
+					
 					result.storeResult(q.dbstore)
-					info = Info {
-						Title: job.Title,
+					info = Info{
+						Title:  job.Title,
 						Status: 0,
 					}
 
