@@ -93,6 +93,9 @@ func (j *Job) Run(arguments []interface{}) {
 //THis method doing preparation arguments, before putting to the function
 func (j *Job) prepareArguments(arguments []interface{})[]reflect.Value {
 	res := []reflect.Value{}
+	if len(arguments) == 0 {
+		return res
+	}
 	for _, i := range arguments {
 		res = append(res, reflect.ValueOf(i))
 	}
@@ -111,6 +114,7 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 		starttime := time.Now().UnixNano()
 		//j.started <- true
 		j.result <- reflect.ValueOf(j.Data).Call(arguments)
+		fmt.Println(<-j.result)
 		//j.started <- false
 		j.done = true
 		j.executionTime = time.Now().UnixNano() - starttime
