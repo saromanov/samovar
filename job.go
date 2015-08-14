@@ -24,7 +24,7 @@ type Job struct {
 	//delay in seconds
 	delay         time.Duration
 	result        interface{}
-	executionTime int64
+	executionTime float64
 }
 
 //This struct provides basic options for job
@@ -112,7 +112,7 @@ func (j *Job) IsDone() bool {
 func (j *Job) jobRun(arguments []reflect.Value) {
 	j.numberofcalls++
 	go func() {
-		starttime := time.Now().UnixNano()
+		starttime := time.Now()
 		//j.started <- true
 		result := reflect.ValueOf(j.Data).Call(arguments)
 		if len(result) > 0 {
@@ -122,7 +122,8 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 		}
 		//j.started <- false
 		j.done = true
-		j.executionTime = time.Now().UnixNano() - starttime
+		j.executionTime = time.Now().Sub(starttime).Seconds()
+		fmt.Println(j.executionTime)
 		j.lock.Lock()
 		j.lock.Unlock()
 	}()
