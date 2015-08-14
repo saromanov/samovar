@@ -7,6 +7,7 @@ import (
 	"net/rpc"
 	"log"
 	"fmt"
+	"math/rand"
 )
 
 type Client struct {
@@ -55,6 +56,33 @@ func (gro *Client) SendWithPeriod(jobtitle string, sec uint, args []interface{})
 		Arguments: args,
 		Period:    sec,
 	}), "default")
+}
+
+func (gro *Client) SendGroup(jobs[] *JobOptions) {
+	if len(jobs) == 0 {
+		log.Printf("Number of sending tasks is zero")
+		return
+	}
+
+	//Get tasks randomly
+	for  {
+		if len(jobs) == 0 {
+			break
+		}
+
+		idx := rand.Intn(len(jobs))
+		job := jobs[idx]
+		jobs = append(jobs[:idx], jobs[idx+1:]...)
+		queuename := "default"
+		if job.Queue != "" {
+			queuename = job.Queue
+		}
+		gro.backend.publishJob(prepareParameters(&JobParams {
+			Name: job.Title,
+			Arguments: job.Arguments,
+		}), queuename)
+	}
+
 }
 
 //GetResult provides non-async version if getting results from the job
