@@ -49,6 +49,7 @@ func createWorker(opt *SamovarOptions) *Worker {
 
 	worker.jobs = &Jobs{
 		jobs: map[string]*Job{},
+		groupjobs: map[string][]*Job{},
 	}
 	worker.jobqueue = []*Job{}
 	return worker
@@ -77,6 +78,11 @@ func (work *Worker) AddJob(title string, fn interface{}) {
 //AddGroupJobs provides append group of depended of each other jobs
 func (work *Worker) AddGroupJobs(title string, groupjobs []*GroupJob) {
 	log.Println(fmt.Sprintf("Register new group of jobs: %s", title))
+	var reply bool
+	err := work.jobs.AppendGroupJob(title, groupjobs, &reply)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
 
