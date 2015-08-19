@@ -130,7 +130,7 @@ func (worker *Worker) start() {
 			case *redis.Message:
 				jobobject := msg.Payload
 				job := getJobArguments(jobobject)
-				var targetjob []Job
+				var targetjob []*Job
 				//This method provides getting job or list > 1, getting group of jobs
 				err := worker.jobs.GetJob(job.Name, &targetjob)
 				if err != nil {
@@ -139,6 +139,8 @@ func (worker *Worker) start() {
 
 				if len(targetjob) == 1 {
 					worker.RunNewJob(msg.Channel, targetjob[0], job)
+				} else {
+					worker.RunNewJobGroup(msg.Channel, targetjob)
 				}
 
 			}
@@ -154,6 +156,15 @@ func (worker *Worker) RunNewJob(queuename string, tj *Job, jp JobParams) {
 	} else {
 		queue.Put(tj, jp)
 	}
+}
+
+func (worker *Worker) RunNewJobGroup(queuename string, tj[]*Job) {
+	queue, ok := worker.queues[queuename]
+	if !ok {
+		log.Printf(fmt.Sprintf("Error: queue with the name %s is not found", queuename))
+		} else {
+			queue.PutGroup(tj)
+		}
 }
 
 func (worker *Worker) Stop() {

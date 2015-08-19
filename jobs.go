@@ -15,7 +15,7 @@ type Jobs struct {
 
 
 //GetJob provides getting job by title
-func (j*Jobs) GetJob(title string, job *Job) error {
+func (j*Jobs) GetJob(title string, job*[]*Job) error {
 	j.jobs[title].numberofcalls++
 	currentjob, ok := j.jobs[title]
 	if !ok {
@@ -24,7 +24,8 @@ func (j*Jobs) GetJob(title string, job *Job) error {
 	if job == nil {
 		return nil
 	}
-	*job = *currentjob
+	jobs1 := []*Job{currentjob}
+	*job = jobs1
 	return nil
 }
 
