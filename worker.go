@@ -130,12 +130,16 @@ func (worker *Worker) start() {
 			case *redis.Message:
 				jobobject := msg.Payload
 				job := getJobArguments(jobobject)
-				var targetjob Job
+				var targetjob []Job
+				//This method provides getting job or list > 1, getting group of jobs
 				err := worker.jobs.GetJob(job.Name, &targetjob)
 				if err != nil {
 					log.Fatal(err)
 				}
-				worker.RunNewJob(msg.Channel, &targetjob, job)
+
+				if len(targetjob) == 1 {
+					worker.RunNewJob(msg.Channel, targetjob[0], job)
+				}
 
 			}
 			time.Sleep(100 * time.Millisecond)
