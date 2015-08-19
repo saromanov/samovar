@@ -9,6 +9,7 @@ import
 //Jobs provides getting jobs and append jobs
 type Jobs struct {
 	jobs   map[string]*Job
+	groupjobs map[string][]*GroupJob
 	limit  int
 }
 
@@ -35,6 +36,13 @@ func (j*Jobs) AppendJob(title string, job*Job, reply *bool) error {
 	}
 
 	j.jobs[title] = job
+	*reply = true
+	return nil
+}
+
+//Append Groupjobs
+func (j*Jobs) AppendGroupJob(title string, grjobs[]*GroupJob, reply *bool) error {
+	j.groupjobs[title] = grjobs
 	*reply = true
 	return nil
 }

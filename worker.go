@@ -12,7 +12,6 @@ const (
 	QUEUENAME = "samowar1"
 )
 
-
 type Worker struct {
 	queues map[string]*Queue
 	//jobs   map[string]*Job
@@ -23,6 +22,11 @@ type Worker struct {
 	Backend  *RedisBackend
 	jobqueue []*Job
 	jobs     *Jobs
+}
+
+type GroupJob struct {
+	Title string
+	Fn    interface{}
 }
 
 //CreateWorker provides initialization of worker
@@ -68,6 +72,12 @@ func (work *Worker) AddJob(title string, fn interface{}) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+//AddGroupJobs provides append group of depended of each other jobs
+func (work *Worker) AddGroupJobs(title string, groupjobs []*GroupJob) {
+	log.Println(fmt.Sprintf("Register new group of jobs: %s", title))
+
 }
 
 //This method provides creation of new job queue
