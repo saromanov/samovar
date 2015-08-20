@@ -4,7 +4,7 @@ import
 (
 	"net/http"
 	"github.com/gorilla/mux"
-	"fmt"
+	//"fmt"
 )
 
 
@@ -21,12 +21,12 @@ func StartServer(jobs *Jobs) {
 	//Get information about job
 	r.HandleFunc("/statjob/{title}", func(w http.ResponseWriter, req *http.Request){
 		title := mux.Vars(req)["title"]
-		var job Job
+		var job []*Job
 		err := jobs.GetJob(title, &job)
 		if err != nil {
 			//fmt.Printf(err)
 		}
-		w.Write([]byte(fmt.Sprintf("%d", job.numberofcalls)))
+		//w.Write([]byte(fmt.Sprintf("%d", job.numberofcalls)))
 		return
 	})
 
