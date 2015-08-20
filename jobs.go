@@ -16,7 +16,6 @@ type Jobs struct {
 
 //GetJob provides getting job by title
 func (j*Jobs) GetJob(title string, job*[]*Job) error {
-	j.jobs[title].numberofcalls++
 	currentjob, ok := j.jobs[title]
 	if !ok {
 		return errors.New(fmt.Sprintf("Job with the title %s is not found", title))
@@ -27,6 +26,11 @@ func (j*Jobs) GetJob(title string, job*[]*Job) error {
 	jobs1 := []*Job{currentjob}
 	*job = jobs1
 	return nil
+}
+
+//increment number of calls
+func (j *Jobs) increment(title string) {
+	j.jobs[title].numberofcalls++
 }
 
 //AppendJob provides set new job

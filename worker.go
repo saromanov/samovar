@@ -138,6 +138,7 @@ func (worker *Worker) start() {
 				}
 
 				if len(targetjob) == 1 {
+					worker.jobs.increment(job.Name)
 					worker.RunNewJob(msg.Channel, targetjob[0], job)
 				} else {
 					worker.RunNewJobGroup(msg.Channel, targetjob)
