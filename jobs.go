@@ -62,3 +62,20 @@ func (j*Jobs) AppendGroupJob(title string, grjobs[]*GroupJob, reply *bool) error
 	*reply = true
 	return nil
 }
+
+
+//Exists return true of jobs or groupjobs already register
+//and false otherwise
+func (j*Jobs) Exists(title string) bool{
+	_, ok := j.jobs[title]
+	if ok {
+		return true
+	}
+
+	_, ok2 := j.groupjobs[title]
+	if ok2 {
+		return true
+	}
+
+	return false
+}

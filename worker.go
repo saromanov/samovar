@@ -68,6 +68,9 @@ func (work *Worker) StartWorker() {
 //AddJob provides registration of the new job
 func (work *Worker) AddJob(title string, fn interface{}) {
 	log.Println(fmt.Sprintf("Register new job: %s", title))
+	if work.jobs.Exists(title) {
+		log.Fatal(fmt.Sprintf("Job with the title %s already registred", title))
+	}
 	var reply bool
 	err := work.jobs.AppendJob(title, CreateJob(title, fn), &reply)
 	if err != nil {
@@ -78,6 +81,9 @@ func (work *Worker) AddJob(title string, fn interface{}) {
 //AddGroupJobs provides append group of depended of each other jobs
 func (work *Worker) AddGroupJobs(title string, groupjobs []*GroupJob) {
 	log.Println(fmt.Sprintf("Register new group of jobs: %s", title))
+	if work.jobs.Exists(title) {
+		log.Fatal(fmt.Sprintf("Job with the title %s already registred", title))
+	}
 	var reply bool
 	err := work.jobs.AppendGroupJob(title, groupjobs, &reply)
 	if err != nil {
