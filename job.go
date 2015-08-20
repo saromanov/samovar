@@ -115,6 +115,7 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 	go func() {
 		starttime := time.Now()
 		//j.started <- true
+		fmt.Println(arguments)
 		result := reflect.ValueOf(j.Data).Call(arguments)
 		if len(result) > 0 {
 			j.result = result
