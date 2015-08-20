@@ -17,14 +17,21 @@ type Jobs struct {
 //GetJob provides getting job by title
 func (j*Jobs) GetJob(title string, job*[]*Job) error {
 	currentjob, ok := j.jobs[title]
-	if !ok {
+	grjob, ok2 := j.groupjobs[title]
+	if !ok && !ok2 {
 		return errors.New(fmt.Sprintf("Job with the title %s is not found", title))
 	}
 	if job == nil {
 		return nil
 	}
-	jobs1 := []*Job{currentjob}
-	*job = jobs1
+	if ok {
+		jobs1 := []*Job{currentjob}
+		*job = jobs1
+	}
+
+	if ok2 {
+		*job = grjob
+	}
 	return nil
 }
 
