@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gopkg.in/redis.v3"
 	"log"
+	"sync"
 	"time"
 )
 
@@ -14,16 +15,18 @@ type QueueOptions struct {
 
 //This queue provides basic data structure
 type Queue struct {
-	jobs    []*Job
-	title   string
-	limit   int
-	options *QueueOptions
-	dbstore *redis.Client
+	jobs      []*Job
+	groupjobs [][]*Job
+	title     string
+	limit     int
+	options   *QueueOptions
+	dbstore   *redis.Client
 }
 
 func CreateQueue(title string) *Queue {
 	queue := new(Queue)
 	queue.jobs = []*Job{}
+	queue.groupjobs = [][]*Job{}
 	queue.title = title
 	//By default, queue is unlimited
 	queue.limit = -1
@@ -40,6 +43,10 @@ func (q *Queue) Get() {
 func (q *Queue) Put(job *Job, jp JobParams) {
 	q.runJob(job, jp)
 	q.jobs = append(q.jobs, job)
+}
+
+func (q *Queue) PutGroup(gjob [] *Job) {
+	q.groupjobs = append(q.groupjobs, gjob)
 }
 
 func (q *Queue) runJob(job *Job, jp JobParams) {
@@ -92,8 +99,8 @@ func (q *Queue) Process() {
 
 					resultitem, err := job.getResult()
 					result := Result{
-						Title:        job.Title,
-						Date:         time.Now(),
+						Title: job.Title,
+						Date:  time.Now(),
 					}
 					//Serialize result, in the case if task contain result value
 					if err == nil {
@@ -104,7 +111,7 @@ func (q *Queue) Process() {
 						result.Result = resultitem
 						result.DataChecksum = getChecksum(res)
 					}
-					
+
 					result.storeResult(q.dbstore)
 					info = Info{
 						Title:  job.Title,
@@ -113,6 +120,31 @@ func (q *Queue) Process() {
 
 					info.storeInfo(q.dbstore)
 				}
+			}
+
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
+}
+
+func (q *Queue) ProcessGroups() {
+	go func() {
+		for {
+			for _, groupjob := range q.groupjobs {
+				go func() {
+					var wg sync.WaitGroup
+					for i := 0; i < len(groupjob); i++ {
+					 	wg.Add(i)
+					} 
+					for _, jobitem := range groupjob {
+						jobitem.Run(jobitem.Arguments)
+						if jobitem.IsDone() {
+							wg.Done()
+						}
+					}
+					wg.Wait()
+					fmt.Println("All group jobs was completed")
+				}()
 			}
 
 			time.Sleep(100 * time.Millisecond)
