@@ -107,6 +107,7 @@ func (work *Worker) registerQueue(title string) {
 	} else {
 		work.queues[queuename] = CreateQueue(queuename)
 		work.queues[queuename].Process()
+		work.queues[queuename].ProcessGroups()
 		msg := fmt.Sprintf("Queue %s was created", title)
 		work.Backend.subscribe(title)
 		log.Print(msg)
