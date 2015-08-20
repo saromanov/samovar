@@ -58,7 +58,10 @@ func (gro *Client) SendWithPeriod(jobtitle string, sec uint, args []interface{})
 	}), "default")
 }
 
-func (gro *Client) SendGroup(jobs[] *JobOptions) {
+
+//SendMany provides starting several jobs 
+//which have been registered as single jobs
+func (gro *Client) SendMany(jobs[] *JobOptions) {
 	if len(jobs) == 0 {
 		log.Printf("Number of sending tasks is zero")
 		return
