@@ -4,17 +4,18 @@ import (
 	"sync"
 	"time"
 	//"log"
+	"errors"
 	"fmt"
 	"math/rand"
 	"reflect"
-	"errors"
 )
 
 type Job struct {
-	Data     interface{}
-	Title    string
-	jonstart time.Time
-	Id       string
+	Data      interface{}
+	Title     string
+	Arguments []interface{}
+	jonstart  time.Time
+	Id        string
 	//Number of times which job was call
 	numberofcalls int
 	done          bool
@@ -92,7 +93,7 @@ func (j *Job) Run(arguments []interface{}) {
 }
 
 //THis method doing preparation arguments, before putting to the function
-func (j *Job) prepareArguments(arguments []interface{})[]reflect.Value {
+func (j *Job) prepareArguments(arguments []interface{}) []reflect.Value {
 	res := []reflect.Value{}
 	if len(arguments) == 0 {
 		return res
