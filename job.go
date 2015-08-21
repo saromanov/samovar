@@ -26,6 +26,7 @@ type Job struct {
 	delay         time.Duration
 	result        interface{}
 	executionTime float64
+	executionTimes []float64
 }
 
 //This struct provides basic options for job
@@ -44,6 +45,7 @@ func CreateJob(title string, fn interface{}) *Job {
 	job.delay = 0
 	job.started = make(chan bool)
 	job.result = make(chan interface{})
+	job.executionTimes = []float64{}
 	job.lock = &sync.Mutex{}
 	return job
 }
@@ -125,7 +127,7 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 		//j.started <- false
 		j.done = true
 		j.executionTime = time.Now().Sub(starttime).Seconds()
-		fmt.Println(j.executionTime)
+		j.executionTimes = append(j.executionTimes, j.executionTime)
 		j.lock.Lock()
 		j.lock.Unlock()
 	}()
