@@ -4,7 +4,7 @@ import
 (
 	"net/http"
 	"github.com/gorilla/mux"
-	//"fmt"
+	"fmt"
 )
 
 
@@ -38,6 +38,7 @@ func StartServer(jobs *Jobs) {
 		}
 
 		client.Send(title, &JobOptions{})
+		w.Write([]byte(fmt.Sprintf("Job %s was sending", title)))
 	})
 	http.ListenAndServe(":8000", r)
 }
