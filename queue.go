@@ -15,12 +15,13 @@ type QueueOptions struct {
 
 //This queue provides basic data structure
 type Queue struct {
-	jobs      []*Job
-	groupjobs [][]*Job
-	title     string
-	limit     int
-	options   *QueueOptions
-	dbstore   *redis.Client
+	jobs        []*Job
+	groupjobs   [][]*Job
+	runningjobs int
+	title       string
+	limit       int
+	options     *QueueOptions
+	dbstore     *redis.Client
 }
 
 func CreateQueue(title string) *Queue {
@@ -28,6 +29,7 @@ func CreateQueue(title string) *Queue {
 	queue.jobs = []*Job{}
 	queue.groupjobs = [][]*Job{}
 	queue.title = title
+	queue.runningjobs = 0
 	//By default, queue is unlimited
 	queue.limit = -1
 	queue.options = new(QueueOptions)
@@ -45,11 +47,12 @@ func (q *Queue) Put(job *Job, jp JobParams) {
 	q.jobs = append(q.jobs, job)
 }
 
-func (q *Queue) PutGroup(gjob [] *Job) {
+func (q *Queue) PutGroup(gjob []*Job) {
 	q.groupjobs = append(q.groupjobs, gjob)
 }
 
 func (q *Queue) runJob(job *Job, jp JobParams) {
+	q.runningjobs++
 	go func(targetjob *Job, job JobParams) {
 		if job.Delay > 0 {
 			targetjob.RunWithDelay(job.Arguments, job.Delay)
@@ -60,10 +63,6 @@ func (q *Queue) runJob(job *Job, jp JobParams) {
 		}
 
 	}(job, jp)
-}
-
-func (q *Queue) find(title string) {
-
 }
 
 func (q *Queue) IsEmpty() bool {
@@ -119,6 +118,7 @@ func (q *Queue) Process() {
 					}
 
 					info.storeInfo(q.dbstore)
+					q.runningjobs--
 				}
 			}
 
@@ -126,7 +126,6 @@ func (q *Queue) Process() {
 		}
 	}()
 }
-
 
 //ProcessGroups provides loop for processing jobs with type "Groupjobs"
 func (q *Queue) ProcessGroups() {
@@ -136,8 +135,8 @@ func (q *Queue) ProcessGroups() {
 				go func() {
 					var wg sync.WaitGroup
 					for i := 0; i < len(groupjob); i++ {
-					 	wg.Add(i)
-					} 
+						wg.Add(i)
+					}
 					for i, jobitem := range groupjob {
 						jobitem.Run(jobitem.Arguments)
 						if jobitem.IsDone() {
