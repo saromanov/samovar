@@ -20,7 +20,7 @@ type Queue struct {
 	groupjobs   [][]*Job
 	runningjobs int32
 	title       string
-	limit       int
+	limit       int32
 	options     *QueueOptions
 	dbstore     *redis.Client
 }
@@ -78,6 +78,10 @@ func (q *Queue) IsEmpty() bool {
 func (q *Queue) Process() {
 	go func() {
 		for {
+			if q.limit != -1 && q.runningjobs > q.limit {
+				log.Printf("Limit has been reached on a number of jobs")
+				continue
+			}
 			for _, job := range q.jobs {
 				if job.IsDone() {
 					idx := 0
