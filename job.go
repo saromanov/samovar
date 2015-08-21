@@ -39,6 +39,7 @@ func CreateJob(title string, fn interface{}) *Job {
 	job.Data = fn
 	job.Title = title
 	job.Id = _generateid()
+	job.Arguments = []interface{}{}
 	job.numberofcalls = 0
 	job.delay = 0
 	job.started = make(chan bool)
@@ -115,7 +116,6 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 	go func() {
 		starttime := time.Now()
 		//j.started <- true
-		fmt.Println(arguments)
 		result := reflect.ValueOf(j.Data).Call(arguments)
 		if len(result) > 0 {
 			j.result = result

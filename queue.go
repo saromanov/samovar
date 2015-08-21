@@ -130,21 +130,23 @@ func (q *Queue) Process() {
 func (q *Queue) ProcessGroups() {
 	go func() {
 		for {
-			for _, groupjob := range q.groupjobs {
+			for idx, groupjob := range q.groupjobs {
 				go func() {
 					var wg sync.WaitGroup
 					for i := 0; i < len(groupjob); i++ {
 					 	wg.Add(i)
 					} 
-					for _, jobitem := range groupjob {
+					for i, jobitem := range groupjob {
 						jobitem.Run(jobitem.Arguments)
 						if jobitem.IsDone() {
+							groupjob = append(groupjob[:i], groupjob[i+1:]...)
 							wg.Done()
 						}
 					}
 					wg.Wait()
 					fmt.Println("All group jobs was completed")
 				}()
+				q.groupjobs = append(q.groupjobs[:idx], q.groupjobs[idx+1:]...)
 			}
 
 			time.Sleep(100 * time.Millisecond)
