@@ -112,6 +112,20 @@ func (j *Job) IsDone() bool {
 	return j.done
 }
 
+//AvgExecutionTime returns average time of execution of past results
+func (j *Job) AvgExecutionTime()float64 {
+	pastres := len(j.executionTimes)
+	if pastres == 0 {
+		return 0
+	}
+	result := 0.0
+	for _, item := range j.executionTimes {
+		result += item
+	}
+
+	return result/float64(pastres)
+}
+
 //Run current job with arguments
 func (j *Job) jobRun(arguments []reflect.Value) {
 	j.numberofcalls++
