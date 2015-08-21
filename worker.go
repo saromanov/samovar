@@ -159,6 +159,12 @@ func (worker *Worker) start() {
 
 func (worker *Worker) RunNewJob(queuename string, tj *Job, jp JobParams) {
 	queue, ok := worker.queues[queuename]
+	go func() {
+		for {
+			fmt.Println(tj.IsDone())
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
 	if !ok {
 		log.Printf(fmt.Sprintf("Error: queue with the name %s is not found", queuename))
 	} else {
