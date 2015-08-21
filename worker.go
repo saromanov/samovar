@@ -157,6 +157,7 @@ func (worker *Worker) start() {
 	}()
 }
 
+//RunNewJob provides start of received job
 func (worker *Worker) RunNewJob(queuename string, tj *Job, jp JobParams) {
 	queue, ok := worker.queues[queuename]
 	go func() {
