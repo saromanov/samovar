@@ -127,6 +127,8 @@ func (q *Queue) Process() {
 	}()
 }
 
+
+//ProcessGroups provides loop for processing jobs with type "Groupjobs"
 func (q *Queue) ProcessGroups() {
 	go func() {
 		for {
