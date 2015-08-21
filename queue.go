@@ -6,6 +6,7 @@ import (
 	"gopkg.in/redis.v3"
 	"log"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -17,7 +18,7 @@ type QueueOptions struct {
 type Queue struct {
 	jobs        []*Job
 	groupjobs   [][]*Job
-	runningjobs int
+	runningjobs int32
 	title       string
 	limit       int
 	options     *QueueOptions
@@ -52,7 +53,7 @@ func (q *Queue) PutGroup(gjob []*Job) {
 }
 
 func (q *Queue) runJob(job *Job, jp JobParams) {
-	q.runningjobs++
+	atomic.AddInt32(&q.runningjobs, 1)
 	go func(targetjob *Job, job JobParams) {
 		if job.Delay > 0 {
 			targetjob.RunWithDelay(job.Arguments, job.Delay)
@@ -118,10 +119,9 @@ func (q *Queue) Process() {
 					}
 
 					info.storeInfo(q.dbstore)
-					q.runningjobs--
+					atomic.AddInt32(&q.runningjobs, -1)
 				}
 			}
-
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
