@@ -35,6 +35,20 @@ func (j*Jobs) GetJob(title string, job*[]*Job) error {
 	return nil
 }
 
+func (j*Jobs) GetOneJob(title string, job *Job) error{
+	currentjob, _ := j.jobs[title]
+	if currentjob == nil {
+
+	}
+	/*if !ok {
+		return errors.New(fmt.Sprintf("Job with the title %s is not found", title))
+	}*/
+	var jb Job
+	jb = *currentjob
+	*job = jb
+	return nil
+}
+
 //increment number of calls
 func (j *Jobs) increment(title string) {
 	j.jobs[title].numberofcalls++
