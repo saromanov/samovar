@@ -147,6 +147,7 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 	}()
 }
 
+//getResult provides getting result from current job
 func (j *Job) getResult() (interface{}, error) {
 	if j.result == nil {
 		return nil, errors.New("Task not contain return value")
