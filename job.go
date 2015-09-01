@@ -108,6 +108,9 @@ func (j *Job) prepareArguments(arguments []interface{}) []reflect.Value {
 
 //IsDone provides checking of current job is done
 func (j *Job) IsDone() bool {
+	if j.started {
+		return false
+	}
 	return j.done
 }
 
