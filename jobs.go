@@ -101,6 +101,10 @@ func (j *Jobs) MeanET(title string)float64 {
 	var meanvalue float64
 	meanvalue = 0.0
 	count := len(job.executionTimes)
+	if count == 0 {
+		return 0
+	}
+	
 	for _, value := range job.executionTimes {
 		meanvalue += value
 	}
