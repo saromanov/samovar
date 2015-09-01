@@ -35,15 +35,16 @@ func (j*Jobs) GetJob(title string, job*[]*Job) error {
 	return nil
 }
 
-func (j*Jobs) GetOneJob(title string, job *Job) error{
-	currentjob, _ := j.jobs[title]
-	if currentjob == nil {
-
+func (j*Jobs) GetNumberOfCalls(title string, num *int) error{
+	var current int
+	currentjob, ok := j.jobs[title]
+	fmt.Println(ok)
+	if !ok {
+		current = 0
+	} else {
+		current = currentjob.numberofcalls
 	}
-	/*if !ok {
-		return errors.New(fmt.Sprintf("Job with the title %s is not found", title))
-	}*/
-	job = currentjob
+	*num = current
 	return nil
 }
 
