@@ -6,13 +6,13 @@ import (
 	"net"
 	"net/rpc"
 	"log"
-	"fmt"
 	"math/rand"
 )
 
 type Client struct {
 	backend *RedisBackend
 	client  *redis.Client
+	rpcclient *rpc.Client
 }
 
 type JobOptions struct {
@@ -29,6 +29,13 @@ func InitClient() *Client {
 	client := new(Client)
 	client.backend = InitRedisBackend()
 	client.client = initRedis("localhost:6379")
+	timeout := time.Duration(100) * time.Millisecond
+	item, err := net.DialTimeout("tcp", ADDR, timeout)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client.rpcclient = rpc.NewClient(item)
 	return client
 }
 
@@ -95,7 +102,11 @@ func (gro *Client) GetResult(title string) interface{} {
 
 //GetStat provides statistics for the job with title
 func (gro *Client) GetJobItem(title string) {
-	callAsRPC("Jobs.GetNumberOfCalls", title)
+	var numcals int
+	errcall := gro.rpcclient.Call("Jobs.GetNumberOfCalls", title, &numcals)
+	if errcall != nil {
+		log.Fatal(errcall)
+	}
 }
 
 func resolveQueueName(title string) string {
@@ -105,19 +116,3 @@ func resolveQueueName(title string) string {
 	return title
 }
 
-func callAsRPC(name, title string) {
-	timeout := time.Duration(100) * time.Millisecond
-	item, err := net.DialTimeout("tcp", ADDR, timeout)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	connection := rpc.NewClient(item)
-	var numcals int
-	errcall := connection.Call(name, title, &numcals)
-	if errcall != nil {
-		log.Fatal(errcall)
-	}
-
-	fmt.Println(numcals)
-}
