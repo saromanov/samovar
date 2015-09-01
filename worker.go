@@ -22,11 +22,17 @@ type Worker struct {
 	Backend  *RedisBackend
 	jobqueue []*Job
 	jobs     *Jobs
+	stat     *Stat
+
 }
 
 type GroupJob struct {
 	Title string
 	Fn    interface{}
+}
+
+type Stat struct {
+	runningjobs int32
 }
 
 //CreateWorker provides initialization of worker
@@ -45,6 +51,8 @@ func createWorker(opt *SamovarOptions) *Worker {
 	if !opt.NotDefaultQueue {
 		log.Println("initialize default queue")
 		worker.AddQueue("default")
+		//Initialize of 
+		worker.AddQueue("_samovars")
 	}
 
 	worker.jobs = &Jobs{
@@ -52,6 +60,7 @@ func createWorker(opt *SamovarOptions) *Worker {
 		groupjobs: map[string][]*Job{},
 	}
 	worker.jobqueue = []*Job{}
+	worker.stat = new(Stat)
 	return worker
 }
 
@@ -60,7 +69,7 @@ func (work *Worker) StartWorker() {
 	log.Printf("Start worker:")
 	work.start()
 	detectExit()
-	//InitRPC("").Run()
+	InitRPC("").Run()
 	StartServer(work.jobs)
 
 }
@@ -146,6 +155,7 @@ func (worker *Worker) start() {
 
 				if len(targetjob) == 1 {
 					worker.jobs.increment(job.Name)
+					worker.stat.runningjobs++
 					worker.RunNewJob(msg.Channel, targetjob[0], job)
 				} else {
 					worker.RunNewJobGroup(msg.Channel, targetjob)
@@ -162,7 +172,9 @@ func (worker *Worker) RunNewJob(queuename string, tj *Job, jp JobParams) {
 	queue, ok := worker.queues[queuename]
 	go func() {
 		for {
-			fmt.Println(tj.IsDone())
+			if tj.IsDone() {
+				worker.stat.runningjobs--
+			}
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
