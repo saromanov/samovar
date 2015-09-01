@@ -43,9 +43,7 @@ func (j*Jobs) GetOneJob(title string, job *Job) error{
 	/*if !ok {
 		return errors.New(fmt.Sprintf("Job with the title %s is not found", title))
 	}*/
-	var jb Job
-	jb = *currentjob
-	*job = jb
+	job = currentjob
 	return nil
 }
 
@@ -92,4 +90,20 @@ func (j*Jobs) Exists(title string) bool{
 	}
 
 	return false
+}
+
+//MeanET returns mean execution time of the job
+func (j *Jobs) MeanET(title string)float64 {
+	job, ok := j.jobs[title]
+	if !ok {
+		return 0
+	}
+	var meanvalue float64
+	meanvalue = 0.0
+	count := len(job.executionTimes)
+	for _, value := range job.executionTimes {
+		meanvalue += value
+	}
+
+	return meanvalue/float64(count)
 }
