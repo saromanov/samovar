@@ -19,7 +19,7 @@ type Job struct {
 	//Number of times which job was call
 	numberofcalls int
 	done          bool
-	started       chan bool
+	started       bool
 	lock          *sync.Mutex
 	options       Options
 	//delay in seconds
@@ -43,7 +43,6 @@ func CreateJob(title string, fn interface{}) *Job {
 	job.Arguments = []interface{}{}
 	job.numberofcalls = 0
 	job.delay = 0
-	job.started = make(chan bool)
 	job.result = make(chan interface{})
 	job.executionTimes = []float64{}
 	job.lock = &sync.Mutex{}
