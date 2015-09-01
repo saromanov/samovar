@@ -104,10 +104,31 @@ func (j *Jobs) MeanET(title string)float64 {
 	if count == 0 {
 		return 0
 	}
-	
+
 	for _, value := range job.executionTimes {
 		meanvalue += value
 	}
 
 	return meanvalue/float64(count)
+}
+
+
+//SHortestJob returns job with shortest execution time
+func (j *Jobs) ShortestJob()*Job {
+	if len(j.jobs) == 0 {
+		return &Job{}
+	}
+
+	var value float64
+	var job *Job
+	value = 999999
+	for key, _ := range j.jobs {
+		mv := j.MeanET(key)
+		if mv < value {
+			value = mv
+			jobtmp, _ := j.jobs[key]
+			job = jobtmp
+		}
+	}
+	return job
 }
