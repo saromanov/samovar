@@ -12,7 +12,7 @@ type Logging struct {
 }
 
 func InitLog(path string) *Logging {
-	err := createFile(path)
+	err := createFile(getPath(path))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,4 +44,13 @@ func createFile(path string) error {
 	defer f.Close()
 	log.SetOutput(f)
 	return nil
+}
+
+//if path is " ", return default path
+func getPath(path string) string {
+	if path == "" {
+		return "/tmp/samovar.log"
+	} else {
+		return path
+	}
 }
