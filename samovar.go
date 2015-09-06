@@ -1,5 +1,10 @@
 package samovar
 
+import
+(
+	//"fmt"
+)
+
 type Samovar struct {
 	queues map[string]*Queue
 	worker *Worker
@@ -16,6 +21,11 @@ type SamovarOptions struct {
 
 //Init provides initialization of basic object
 func Init() *Samovar {
+	gro := new(Samovar)
+	return gro
+}
+
+func ClientInit() *Samovar {
 	gro := new(Samovar)
 	return gro
 }
