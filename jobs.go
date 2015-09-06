@@ -47,11 +47,6 @@ func (j*Jobs) GetNumberOfCalls(title string, num *int) error{
 	return nil
 }
 
-//increment number of calls
-func (j *Jobs) increment(title string) {
-	j.jobs[title].numberofcalls++
-}
-
 //AppendJob provides set new job
 func (j*Jobs) AppendJob(title string, job*Job, reply *bool) error {
 	if j.limit > 0 && len(j.jobs) == j.limit {

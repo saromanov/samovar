@@ -79,7 +79,8 @@ func (work *Worker) StartWorker() {
 
 //AddJob provides registration of the new job
 func (work *Worker) AddJob(title string, fn interface{}) {
-	log.Println(fmt.Sprintf("Register new job: %s", title))
+	msg := fmt.Sprintf("Register new job: %s", title)
+	work.logging.LogWrite(msg)
 	if work.jobs.Exists(title) {
 		log.Fatal(fmt.Sprintf("Job with the title %s already registred", title))
 	}
@@ -92,7 +93,8 @@ func (work *Worker) AddJob(title string, fn interface{}) {
 
 //AddGroupJobs provides append group of depended of each other jobs
 func (work *Worker) AddGroupJobs(title string, groupjobs []*GroupJob) {
-	log.Println(fmt.Sprintf("Register new group of jobs: %s", title))
+	msg := fmt.Sprintf("Register new group of jobs: %s", title)
+	work.logging.LogWrite(msg)
 	if work.jobs.Exists(title) {
 		log.Fatal(fmt.Sprintf("Job with the title %s already registred", title))
 	}
@@ -157,7 +159,7 @@ func (worker *Worker) start() {
 				}
 
 				if len(targetjob) == 1 {
-					worker.jobs.increment(job.Name)
+					//worker.jobs.increment(job.Name)
 					worker.stat.runningjobs++
 					worker.RunNewJob(msg.Channel, targetjob[0], job)
 				} else {
