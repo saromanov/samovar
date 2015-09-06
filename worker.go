@@ -23,6 +23,7 @@ type Worker struct {
 	jobqueue []*Job
 	jobs     *Jobs
 	stat     *Stat
+	logging  *Logging
 
 }
 
@@ -61,6 +62,7 @@ func createWorker(opt *SamovarOptions) *Worker {
 	}
 	worker.jobqueue = []*Job{}
 	worker.stat = new(Stat)
+	worker.logging = InitLog(opt.Logpath)
 	return worker
 }
 
@@ -69,6 +71,7 @@ func (work *Worker) StartWorker() {
 	log.Printf("Start worker:")
 	work.start()
 	detectExit()
+	RegisterRPCFunction(work.jobs)
 	InitRPC("").Run()
 	StartServer(work.jobs)
 

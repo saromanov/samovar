@@ -17,6 +17,7 @@ type SamovarOptions struct {
 	Host            string
 	Port            uint
 	NotDefaultQueue bool
+	Logpath         string
 }
 
 //Init provides initialization of basic object
@@ -25,10 +26,6 @@ func Init() *Samovar {
 	return gro
 }
 
-func ClientInit() *Samovar {
-	gro := new(Samovar)
-	return gro
-}
 
 //CreateClient provides initialization of client
 func (gro *Samovar) CreateClient() *Client {
