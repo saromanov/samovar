@@ -47,6 +47,19 @@ func (j*Jobs) GetNumberOfCalls(title string, num *int) error{
 	return nil
 }
 
+//IsJobDone returns if current job is done
+func (j *Jobs) IsJobDone(title string, result *bool) error {
+	var current bool
+	currentjob, ok := j.jobs[title]
+	if !ok {
+		current = false
+	} else {
+		current = currentjob.done
+	}
+	*result = current
+	return nil
+}
+
 //AppendJob provides set new job
 func (j*Jobs) AppendJob(title string, job*Job, reply *bool) error {
 	if j.limit > 0 && len(j.jobs) == j.limit {
