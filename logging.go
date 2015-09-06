@@ -13,7 +13,6 @@ type Logging struct {
 
 func InitLog(path string) *Logging {
 	currpath := getPath(path)
-	fmt.Println("LOGPATH: ", currpath)
 	err := createFile(currpath)
 	if err != nil {
 		log.Fatal(err)
@@ -25,7 +24,7 @@ func InitLog(path string) *Logging {
 
 //LogWrite provides default writes to log file
 func (l *Logging) LogWrite(msg string) {
-	log.Println(msg)
+	log.Printf(msg)
 }
 
 //SetNewPath provides change output file for logging
@@ -39,11 +38,10 @@ func (l *Logging) SetNewPath(newpath string) error {
 }
 
 func createFile(path string) error {
-	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile(path, os.O_APPEND | os.O_CREATE, 0777)
 	if err != nil {
 		return errors.New(fmt.Sprintf("error opening file: %v", err))
 	}
-	defer f.Close()
 	log.SetOutput(f)
 	return nil
 }
