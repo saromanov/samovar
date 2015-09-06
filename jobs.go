@@ -38,7 +38,6 @@ func (j*Jobs) GetJob(title string, job*[]*Job) error {
 func (j*Jobs) GetNumberOfCalls(title string, num *int) error{
 	var current int
 	currentjob, ok := j.jobs[title]
-	fmt.Println(ok)
 	if !ok {
 		current = 0
 	} else {
