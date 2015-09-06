@@ -24,6 +24,12 @@ type JobOptions struct {
 	Queue     string
 }
 
+//JobItem provides information about job, getting from server
+type JobItem struct {
+	NumberOfCalls int
+	Done bool
+}
+
 //Init client provides initialization of samovar client
 func InitClient() *Client {
 	client := new(Client)
@@ -101,12 +107,18 @@ func (gro *Client) GetResult(title string) interface{} {
 }
 
 //GetStat provides statistics for the job with title
-func (gro *Client) GetJobItem(title string) {
+func (gro *Client) GetJobItem(title string)*JobItem {
 	var numcals int
 	errcall := gro.rpcclient.Call("Jobs.GetNumberOfCalls", title, &numcals)
 	if errcall != nil {
 		log.Fatal(errcall)
 	}
+	var done bool
+	errcall2 := gro.rpcclient.Call("Jobs.IsJobDone", title, &done)
+	if errcall2 != nil {
+		log.Fatal(errcall2)
+	}
+	return &JobItem{NumberOfCalls: numcals, Done:done}
 }
 
 func resolveQueueName(title string) string {
