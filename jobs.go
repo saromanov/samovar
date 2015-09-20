@@ -60,6 +60,18 @@ func (j *Jobs) IsJobDone(title string, result *bool) error {
 	return nil
 }
 
+//GetJobResult returns result of job by the title with rpc call
+func (j *Jobs) GetJobResult(title string, result *interface{}) error {
+	currentjob, ok := j.jobs[title]
+	if !ok {
+		*result = nil
+		return errors.New(fmt.Sprintf("Job by title %s is not found", title))
+	}
+
+	*result = currentjob.result
+	return nil
+}
+
 //AppendJob provides set new job
 func (j*Jobs) AppendJob(title string, job*Job, reply *bool) error {
 	if j.limit > 0 && len(j.jobs) == j.limit {
