@@ -103,6 +103,7 @@ func (q *Queue) Process() {
 
 					resultitem, err := job.getResult()
 					result := Result{
+						ID   : Idgen(),
 						Title: job.Title,
 						Date:  time.Now(),
 						Result: resultitem,
