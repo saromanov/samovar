@@ -13,14 +13,14 @@ import (
 type Job struct {
 	Data      interface{}
 	Title     string
-	Arguments []interface{}
+	Arguments interface{}
 	jonstart  time.Time
 	Id        string
 	//Number of times which job was call
 	numberofcalls int
 	done          bool
 	started       bool
-	lock          *sync.Mutex
+	lock          *sync.RWMutex
 	options       Options
 	//delay in seconds
 	delay         time.Duration
@@ -45,7 +45,7 @@ func CreateJob(title string, fn interface{}) *Job {
 	job.delay = 0
 	job.result = make(chan interface{})
 	job.executionTimes = []float64{}
-	job.lock = &sync.Mutex{}
+	job.lock = &sync.RWMutex{}
 	return job
 }
 
@@ -60,7 +60,7 @@ func _generateid() string {
 }
 
 //RunWithDelay provides running job with delay n seconds
-func (j *Job) RunWithDelay(arguments []interface{}, delay uint) {
+func (j *Job) RunWithDelay(arguments interface{}, delay uint) {
 	go func() {
 		time.Sleep(time.Duration(delay) * time.Second)
 		j.Run(arguments)
@@ -68,7 +68,7 @@ func (j *Job) RunWithDelay(arguments []interface{}, delay uint) {
 }
 
 //RunEvery provides run job every n seconds
-func (j *Job) RunEvery(arguments []interface{}, sec uint) {
+func (j *Job) RunEvery(arguments interface{}, sec uint) {
 	go func() {
 		for {
 			time.Sleep(time.Duration(sec) * time.Second)
@@ -78,7 +78,7 @@ func (j *Job) RunEvery(arguments []interface{}, sec uint) {
 }
 
 //RunTimes provides running of job t n times with delay sec
-func (j *Job) RunTimes(arguments []interface{}, sec uint, times int) {
+func (j *Job) RunTimes(arguments interface{}, sec uint, times int) {
 	go func() {
 		for i := 0; i < times; i++ {
 			time.Sleep(time.Duration(sec) * time.Second)
@@ -88,22 +88,16 @@ func (j *Job) RunTimes(arguments []interface{}, sec uint, times int) {
 }
 
 //This method provides basic run of the job
-func (j *Job) Run(arguments []interface{}) {
+func (j *Job) Run(arguments interface{}) {
 	fmt.Println(fmt.Sprintf("Start to processing %s", j.Title))
 	newarguments := j.prepareArguments(arguments)
 	j.jobRun(newarguments)
 }
 
-//THis method doing preparation arguments, before putting to the function
-func (j *Job) prepareArguments(arguments []interface{}) []reflect.Value {
-	res := []reflect.Value{}
-	if len(arguments) == 0 {
-		return res
-	}
-	for _, i := range arguments {
-		res = append(res, reflect.ValueOf(i))
-	}
-	return res
+//This method doing preparation arguments, before putting to the function
+func (j *Job) prepareArguments(arguments interface{}) []reflect.Value {
+	fmt.Println(reflect.ValueOf(arguments).Kind())
+	return []reflect.Value{reflect.ValueOf(arguments)}
 }
 
 //IsDone provides checking of current job is done
@@ -130,7 +124,9 @@ func (j *Job) AvgExecutionTime()float64 {
 
 //Run current job with arguments
 func (j *Job) jobRun(arguments []reflect.Value) {
+	j.lock.RLock()
 	j.numberofcalls++
+	j.lock.RUnlock()
 	go func() {
 		starttime := time.Now()
 		//j.started <- true

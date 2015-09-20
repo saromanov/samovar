@@ -17,7 +17,7 @@ type Client struct {
 
 type JobOptions struct {
 	Title     string
-	Arguments []interface{}
+	Arguments interface{}
 	Delay     uint
 	Period    uint
 	Priority  uint
@@ -28,6 +28,7 @@ type JobOptions struct {
 type JobItem struct {
 	NumberOfCalls int
 	Done bool
+	Result interface{}
 }
 
 //Init client provides initialization of samovar client
@@ -118,6 +119,12 @@ func (gro *Client) GetJobItem(title string)*JobItem {
 	if errcall2 != nil {
 		log.Fatal(errcall2)
 	}
+
+	/*var result interface{}
+	errcall3 := gro.rpcclient.Call("Jobs.GetJobResult", title, &result)
+	if errcall3 != nil {
+		log.Fatal(errcall3)
+	}*/
 	return &JobItem{NumberOfCalls: numcals, Done:done}
 }
 

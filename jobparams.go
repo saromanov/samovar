@@ -7,10 +7,9 @@ import (
 //JobParams provides struct set to queue
 type JobParams struct {
 	Name      string
-	Arguments []interface{}
+	Arguments interface{}
 	Delay     uint
 	Period    uint
-
 	//HardDeadline represents time where task must be complete
 	Hardeadline   float64
 }
