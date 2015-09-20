@@ -5,6 +5,9 @@ import (
 	"os"
 	"os/signal"
 	"encoding/json"
+	"os/exec"
+	"math/rand"
+	"time"
 )
 
 func detectExit() {
@@ -23,4 +26,19 @@ func Marshal(res interface{}) string {
 		panic(err)
 	}
 	return string(results)
+}
+
+//Idgen provides generation of unique id for job result
+func Idgen() string {
+	res, err := exec.Command("uuidgen").Output()
+	if err != nil {
+		result := ""
+		for i := 0; i < 16; i++ {
+			rand.Seed(time.Now().UTC().UnixNano())
+			result += string(1+rand.Intn(9))
+		}
+		return result
+	}
+
+	return string(res)
 }
