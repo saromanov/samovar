@@ -10,6 +10,7 @@ import (
 )
 
 type Result struct {
+	ID           string
 	Title        string
 	Result       interface{}
 	Date         time.Time
@@ -24,9 +25,10 @@ func (res *Result) storeResult(client *redis.Client) {
 
 func getResult(client *redis.Client, title string) interface{} {
 	var res Result
-	result, err := client.HGet("samovar", title).Result()
+	result, err := client.HGet("samovar", fmt.Sprintf("%s_result", title)).Result()
 	if err != nil {
 		log.Printf(fmt.Sprintf("Job by title %s not found", title))
+		return nil
 	}
 	errunm := json.Unmarshal([]byte(result), &res)
 	if errunm != nil {
