@@ -105,6 +105,7 @@ func (q *Queue) Process() {
 					result := Result{
 						Title: job.Title,
 						Date:  time.Now(),
+						Result: resultitem,
 					}
 					//Serialize result, in the case if task contain result value
 					if err == nil {
