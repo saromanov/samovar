@@ -132,7 +132,7 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 		//j.started <- true
 		result := reflect.ValueOf(j.Data).Call(arguments)
 		if len(result) > 0 {
-			j.result = result
+			j.result = result[0].Interface()
 		} else {
 			j.result = nil
 		}
