@@ -113,6 +113,8 @@ func (work *Worker) AddQueue(title string) {
 	work.Backend.registerQueue(title)
 }
 
+
+//Register queue provides store name of queue
 func (work *Worker) registerQueue(title string) {
 	queuename := "samovar_" + title
 	_, ok := work.queues[queuename]
