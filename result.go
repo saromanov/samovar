@@ -9,12 +9,20 @@ import (
 	"time"
 )
 
+
+const (
+	STARTED = iota
+	FINISHED
+	FAILED 
+)
+
 type Result struct {
 	ID           string
 	Title        string
 	Result       interface{}
 	Date         time.Time
 	DataChecksum uint32
+	Status       uint32
 }
 
 //Store result provides write function result to db

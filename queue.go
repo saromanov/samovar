@@ -98,15 +98,22 @@ func (q *Queue) Process() {
 						Title:  job.Title,
 						Status: 1,
 					}
+					preresult := Result{
+						ID: Idgen(),
+						Title: job.Title,
+						Date: time.Now(),
+						Status: STARTED,
+					}
+					preresult.storeResult(q.dbstore)
 
 					info.storeInfo(q.dbstore)
-
 					resultitem, err := job.getResult()
 					result := Result{
 						ID   : Idgen(),
 						Title: job.Title,
 						Date:  time.Now(),
 						Result: resultitem,
+						Status: FINISHED,
 					}
 					//Serialize result, in the case if task contain result value
 					if err == nil {
