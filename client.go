@@ -13,6 +13,7 @@ type Client struct {
 	backend *RedisBackend
 	client  *redis.Client
 	rpcclient *rpc.Client
+	store     *Store
 }
 
 type JobOptions struct {
@@ -43,6 +44,7 @@ func InitClient() *Client {
 	}
 
 	client.rpcclient = rpc.NewClient(item)
+	client.store = InitStore()
 	return client
 }
 
@@ -109,6 +111,14 @@ func (gro *Client) GetResult(title string) interface{} {
 		log.Fatal(err)
 	}
 	return result
+}
+
+//Saveresult provides storing result of task by title "tasktile" to key-value store
+//Note: Now suppoted only redis
+func (gro *Client) SaveResult(tasktitle, key string) {
+	result := gro.GetResult(tasktitle)
+	gro.store.Set(key, string(Marshal(result)))
+
 }
 
 //GetStat provides statistics for the job with title
