@@ -119,12 +119,6 @@ func (gro *Client) GetJobItem(title string)*JobItem {
 	if errcall2 != nil {
 		log.Fatal(errcall2)
 	}
-
-	/*var result interface{}
-	errcall3 := gro.rpcclient.Call("Jobs.GetJobResult", title, &result)
-	if errcall3 != nil {
-		log.Fatal(errcall3)
-	}*/
 	return &JobItem{NumberOfCalls: numcals, Done:done}
 }
 
