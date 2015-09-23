@@ -7,6 +7,7 @@ import (
 	"hash/crc32"
 	"log"
 	"time"
+	"errors"
 )
 
 
@@ -27,6 +28,11 @@ type Result struct {
 
 //Store result provides write function result to db
 func (res *Result) storeResult(client *redis.Client) {
+	err := res.checkResultItem()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	results := Marshal(res)
 	client.HSet("samovar", fmt.Sprintf("%s_result", res.Title), string(results))
 }
@@ -50,4 +56,17 @@ func getChecksum(item []byte) uint32 {
 	crc := crc32.New(crc32.MakeTable(crc32.Castagnoli))
 	crc.Write([]byte(item))
 	return crc.Sum32()
+}
+
+//This helful method returns error if the fields of Result is invalid
+func (res*Result) checkResultItem() error {
+	if res.Title == " " || res.Title == "" {
+		return errors.New("Title is empty string")
+	}
+
+	if res.ID == "" {
+		return errors.New("ID is empty")
+	}
+
+	return nil
 }
