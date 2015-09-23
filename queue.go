@@ -44,6 +44,13 @@ func (q *Queue) Get() {
 }
 
 func (q *Queue) Put(job *Job, jp JobParams) {
+	preresult := Result{
+			ID: Idgen(),
+			Title: job.Title,
+			Date: time.Now(),
+			Status: STARTED,
+	}
+	preresult.storeResult(q.dbstore)
 	q.runJob(job, jp)
 	q.jobs = append(q.jobs, job)
 }
@@ -98,16 +105,9 @@ func (q *Queue) Process() {
 						Title:  job.Title,
 						Status: 1,
 					}
-					preresult := Result{
-						ID: Idgen(),
-						Title: job.Title,
-						Date: time.Now(),
-						Status: STARTED,
-					}
-					preresult.storeResult(q.dbstore)
 
 					info.storeInfo(q.dbstore)
-					resultitem, err := job.getResult()
+					resultitem, err := job.waitUntilResult()
 					result := Result{
 						ID   : Idgen(),
 						Title: job.Title,
