@@ -96,7 +96,6 @@ func (j *Job) Run(arguments interface{}) {
 
 //This method doing preparation arguments, before putting to the function
 func (j *Job) prepareArguments(arguments interface{}) []reflect.Value {
-	fmt.Println(reflect.ValueOf(arguments).Kind())
 	return []reflect.Value{reflect.ValueOf(arguments)}
 }
 
@@ -130,6 +129,7 @@ func (j *Job) jobRun(arguments []reflect.Value) {
 	go func() {
 		starttime := time.Now()
 		//j.started <- true
+		j.done = false
 		result := reflect.ValueOf(j.Data).Call(arguments)
 		if len(result) > 0 {
 			j.result = result[0].Interface()
@@ -151,4 +151,16 @@ func (j *Job) getResult() (interface{}, error) {
 		return nil, errors.New("Task not contain return value")
 	}
 	return j.result, nil
+}
+
+func (j *Job) waitUntilResult() (interface{}, error) {
+	for {
+		if j.done == true {
+			if j.result == nil {
+				return nil, errors.New("Task not contain return value")
+			}
+			return j.result, nil
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 }
