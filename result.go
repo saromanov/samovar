@@ -37,18 +37,17 @@ func (res *Result) storeResult(client *redis.Client) {
 	client.HSet("samovar", fmt.Sprintf("%s_result", res.Title), string(results))
 }
 
-func getResult(client *redis.Client, title string) interface{} {
+func getResult(client *redis.Client, title string) (interface{}, error) {
 	var res Result
 	result, err := client.HGet("samovar", fmt.Sprintf("%s_result", title)).Result()
 	if err != nil {
-		log.Printf(fmt.Sprintf("Job by title %s not found", title))
-		return nil
+		return nil, errors.New(fmt.Sprintf("Job by title %s not found", title))
 	}
 	errunm := json.Unmarshal([]byte(result), &res)
 	if errunm != nil {
-		panic(err)
+		return nil, errunm
 	}
-	return res
+	return res, nil
 
 }
 
