@@ -113,6 +113,15 @@ func (gro *Client) GetResult(title string) interface{} {
 	return result
 }
 
+//GetResultByID provides getting result from past job by ID
+func (gro *Client) GetResultByID(id string) interface{} {
+	result, err := getResultById(gro.client, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return result
+}
+
 //Saveresult provides storing result of task by title "tasktile" to key-value store
 //Note: Now suppoted only redis
 func (gro *Client) SaveResult(tasktitle, key string) {
