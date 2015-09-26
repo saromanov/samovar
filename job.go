@@ -14,10 +14,9 @@ type Job struct {
 	Data      interface{}
 	Title     string
 	Arguments interface{}
-	jonstart  time.Time
 	Id        string
 	//Number of times which job was call
-	numberofcalls int
+	Numberofcalls int
 	done          bool
 	started       bool
 	lock          *sync.RWMutex
@@ -29,7 +28,7 @@ type Job struct {
 	executionTimes []float64
 	//deadline is optional value provides expected execution time of the job
 	//if deadline is failed, job also is feailed
-	deadline      float64
+	Deadline      float64
 }
 
 //This struct provides basic options for job
@@ -44,12 +43,12 @@ func CreateJob(title string, fn interface{}) *Job {
 	job.Title = title
 	job.Id = _generateid()
 	job.Arguments = []interface{}{}
-	job.numberofcalls = 0
+	job.Numberofcalls = 0
 	job.delay = 0
 	job.result = make(chan interface{})
 	job.executionTimes = []float64{}
 	job.lock = &sync.RWMutex{}
-	job.deadline = -1
+	job.Deadline = -1
 	return job
 }
 
@@ -65,7 +64,7 @@ func _generateid() string {
 
 //AddDeadline provides setting new deadline for the job
 func (j *Job) AddDeadline(deadline float64) {
-	j.deadline = deadline
+	j.Deadline = Deadline
 }
 
 //RunWithDelay provides running job with delay n seconds
@@ -133,7 +132,7 @@ func (j *Job) AvgExecutionTime()float64 {
 //Run current job with arguments
 func (j *Job) jobRun(arguments []reflect.Value) {
 	j.lock.RLock()
-	j.numberofcalls++
+	j.Numberofcalls++
 	j.lock.RUnlock()
 	go func() {
 		starttime := time.Now()
