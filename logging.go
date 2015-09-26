@@ -7,6 +7,10 @@ import (
 	"fmt"
 )
 
+const (
+	DEFAULTPATH = "/tmp/samovar.log"
+)
+
 type Logging struct {
 	path string
 }
@@ -49,7 +53,7 @@ func createFile(path string) error {
 //if path is " ", return default path
 func getPath(path string) string {
 	if path == "" {
-		return "/tmp/samovar.log"
+		return DEFAULTPATH
 	} else {
 		return path
 	}
