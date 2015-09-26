@@ -27,6 +27,9 @@ type Job struct {
 	result        interface{}
 	executionTime float64
 	executionTimes []float64
+	//deadline is optional value provides expected execution time of the job
+	//if deadline is failed, job also is feailed
+	deadline      float64
 }
 
 //This struct provides basic options for job
@@ -46,6 +49,7 @@ func CreateJob(title string, fn interface{}) *Job {
 	job.result = make(chan interface{})
 	job.executionTimes = []float64{}
 	job.lock = &sync.RWMutex{}
+	job.deadline = -1
 	return job
 }
 
@@ -57,6 +61,11 @@ func _generateid() string {
 		b[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(b)
+}
+
+//AddDeadline provides setting new deadline for the job
+func (j *Job) AddDeadline(deadline float64) {
+	j.deadline = deadline
 }
 
 //RunWithDelay provides running job with delay n seconds
