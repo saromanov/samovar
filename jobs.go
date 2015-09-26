@@ -40,7 +40,7 @@ func (j*Jobs) GetNumberOfCalls(title string, num *int) error{
 	if !ok {
 		current = 0
 	} else {
-		current = currentjob.numberofcalls
+		current = currentjob.Numberofcalls
 	}
 	*num = current
 	return nil

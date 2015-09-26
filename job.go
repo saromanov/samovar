@@ -64,7 +64,7 @@ func _generateid() string {
 
 //AddDeadline provides setting new deadline for the job
 func (j *Job) AddDeadline(deadline float64) {
-	j.Deadline = Deadline
+	j.Deadline = deadline
 }
 
 //RunWithDelay provides running job with delay n seconds

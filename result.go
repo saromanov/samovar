@@ -37,6 +37,27 @@ func (res *Result) storeResult(client *redis.Client) {
 	client.HSet("samovar", fmt.Sprintf("%s_result", res.Title), string(results))
 }
 
+//storeResultbyId provides setting only id and reslt of the job
+func (res *Result) storeResultById(client *redis.Client) {
+	value := Marshal(res.Result)
+	client.HSet("samovar", fmt.Sprintf("%s_idresult", res.ID), string(value))
+}
+
+//return result of the job by id
+func getResultById(client *redis.Client, id string) (interface{}, error) {
+	var res interface{}
+	result, err := client.HGet("samovar", fmt.Sprintf("%s_idresult", id)).Result()
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("ID %s not found", id))
+	}
+
+	errunm := json.Unmarshal([]byte(result), &res)
+	if errunm != nil {
+		return nil, errunm
+	}
+	return res, nil
+}
+
 func getResult(client *redis.Client, title string) (interface{}, error) {
 	var res Result
 	result, err := client.HGet("samovar", fmt.Sprintf("%s_result", title)).Result()
