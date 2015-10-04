@@ -109,7 +109,7 @@ func (work *Worker) AddGroupJobs(title string, groupjobs []*GroupJob) {
 
 //This method provides creation of new job queue
 func (work *Worker) AddQueue(title string) {
-	log.Printf(fmt.Sprintf("Create queue %s", title))
+	log.Printf(fmt.Sprintf("Try to create queue %s", title))
 	work.registerQueue(title)
 	work.Backend.RegisterQueue(title)
 }
