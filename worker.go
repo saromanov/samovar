@@ -201,6 +201,7 @@ func (worker *Worker) RunNewJobGroup(queuename string, tj[]*Job) {
 		}
 }
 
+//Stop provides stopping of worker
 func (worker *Worker) Stop() {
 	worker.stop = true
 }
