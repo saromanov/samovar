@@ -129,6 +129,11 @@ func (j *Job) AvgExecutionTime()float64 {
 	return result/float64(pastres)
 }
 
+//GetNumberOfCalls returns current numberofcalls from job
+func (j *Job) GetNumberOfCalls() int {
+	return j.Numberofcalls
+}
+
 //Run current job with arguments
 func (j *Job) jobRun(arguments []reflect.Value) {
 	j.lock.RLock()
