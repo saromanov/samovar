@@ -56,6 +56,11 @@ func (q *Queue) Put(job *Job, jp JobParams) {
 	q.jobs = append(q.jobs, job)
 }
 
+//Clean provides remove all jobs from queue
+func (q *Queue) Clean() {
+	q.jobs = []*Job{}
+}
+
 func (q *Queue) PutGroup(gjob []*Job) {
 	q.groupjobs = append(q.groupjobs, gjob)
 }
