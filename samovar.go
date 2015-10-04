@@ -1,10 +1,5 @@
 package samovar
 
-import
-(
-	//"fmt"
-)
-
 type Samovar struct {
 	queues map[string]*Queue
 	worker *Worker
