@@ -7,10 +7,11 @@ import (
 	"net/rpc"
 	"log"
 	"math/rand"
+	"./backend"
 )
 
 type Client struct {
-	backend *RedisBackend
+	back backend.Backend
 	client  *redis.Client
 	rpcclient *rpc.Client
 	store     *Store
@@ -35,8 +36,8 @@ type JobItem struct {
 //Init client provides initialization of samovar client
 func InitClient() *Client {
 	client := new(Client)
-	client.backend = InitRedisBackend()
-	client.client = initRedis("localhost:6379")
+	client.back = backend.InitRedisBackend()
+	client.client = backend.InitRedis("localhost:6379")
 	timeout := time.Duration(100) * time.Millisecond
 	item, err := net.DialTimeout("tcp", ADDR, timeout)
 	if err != nil {
@@ -50,7 +51,7 @@ func InitClient() *Client {
 
 //Send provides sending arguments to the function
 func (gro *Client) Send(jobtitle string, opt *JobOptions) {
-	gro.backend.publishJob(prepareParameters(&JobParams{
+	gro.back.PublishJob(prepareParameters(&JobParams{
 		Name:      jobtitle,
 		Arguments: opt.Arguments,
 	}), resolveQueueName(opt.Queue))
@@ -58,7 +59,7 @@ func (gro *Client) Send(jobtitle string, opt *JobOptions) {
 
 //SendWithDelay provides sending arguments to job with delay
 func (gro *Client) SendWithDelay(jobtitle string, delay uint, args []interface{}) {
-	gro.backend.publishJob(prepareParameters(&JobParams{
+	gro.back.PublishJob(prepareParameters(&JobParams{
 		Name:      jobtitle,
 		Arguments: args,
 		Delay:     delay,
@@ -67,7 +68,7 @@ func (gro *Client) SendWithDelay(jobtitle string, delay uint, args []interface{}
 
 //SendWithPeriod provides starting periodic task execution
 func (gro *Client) SendWithPeriod(jobtitle string, sec uint, args []interface{}) {
-	gro.backend.publishJob(prepareParameters(&JobParams{
+	gro.back.PublishJob(prepareParameters(&JobParams{
 		Name:      jobtitle,
 		Arguments: args,
 		Period:    sec,
@@ -96,7 +97,7 @@ func (gro *Client) SendMany(jobs[] *JobOptions) {
 		if job.Queue != "" {
 			queuename = job.Queue
 		}
-		gro.backend.publishJob(prepareParameters(&JobParams {
+		gro.back.PublishJob(prepareParameters(&JobParams {
 			Name: job.Title,
 			Arguments: job.Arguments,
 		}), queuename)

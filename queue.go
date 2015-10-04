@@ -8,6 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"./backend"
 )
 
 //Options for queue
@@ -34,7 +35,7 @@ func CreateQueue(title string) *Queue {
 	//By default, queue is unlimited
 	queue.limit = -1
 	queue.options = new(QueueOptions)
-	queue.dbstore = initRedis("localhost:6379")
+	queue.dbstore = backend.InitRedis("localhost:6379")
 	return queue
 }
 
@@ -126,6 +127,7 @@ func (q *Queue) Process() {
 					}
 
 					result.storeResult(q.dbstore)
+					result.storeResultById(q.dbstore)
 					info = Info{
 						Title:  job.Title,
 						Status: 0,

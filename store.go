@@ -4,6 +4,7 @@ import
 	"gopkg.in/redis.v3"
 	"encoding/json"
 	"log"
+	"./backend"
 )
 
 const (
@@ -16,7 +17,7 @@ type Store struct {
 
 func InitStore()*Store {
 	st := new(Store)
-	st.client = initRedis("localhost:6379")
+	st.client = backend.InitRedis("localhost:6379")
 	return st
 }
 

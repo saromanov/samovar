@@ -1,6 +1,7 @@
 package samovar
 
 import (
+	"./backend"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -12,8 +13,7 @@ type JobShow struct {
 func StartServer(jobs *Jobs) {
 	r := mux.NewRouter()
 	client := new(Client)
-	client.backend = InitRedisBackend()
-	client.client = initRedis("localhost:6379")
+	client.client = backend.InitRedis("localhost:6379")
 
 	//Get information about job
 	r.HandleFunc("/statjob/{title}", func(w http.ResponseWriter, req *http.Request) {

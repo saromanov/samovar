@@ -6,6 +6,7 @@ import (
 	"log"
 	//"net/http"
 	"time"
+	"./backend"
 )
 
 const (
@@ -19,7 +20,7 @@ type Worker struct {
 	port uint
 	stop bool
 	//Backend provides comunications with redis
-	Backend  *RedisBackend
+	Backend  backend.Backend
 	jobqueue []*Job
 	jobs     *Jobs
 	stat     *Stat
@@ -42,7 +43,7 @@ func createWorker(opt *SamovarOptions) *Worker {
 	worker.host = opt.Host
 	worker.port = opt.Port
 	worker.queues = map[string]*Queue{}
-	worker.Backend = InitRedisBackend()
+	worker.Backend = backend.InitRedisBackend()
 	if len(opt.Queues) != 0 {
 		for _, qname := range opt.Queues {
 			worker.AddQueue(qname)
@@ -110,7 +111,7 @@ func (work *Worker) AddGroupJobs(title string, groupjobs []*GroupJob) {
 func (work *Worker) AddQueue(title string) {
 	log.Printf(fmt.Sprintf("Create queue %s", title))
 	work.registerQueue(title)
-	work.Backend.registerQueue(title)
+	work.Backend.RegisterQueue(title)
 }
 
 
@@ -125,7 +126,7 @@ func (work *Worker) registerQueue(title string) {
 		work.queues[queuename].Process()
 		work.queues[queuename].ProcessGroups()
 		msg := fmt.Sprintf("Queue %s was created", title)
-		work.Backend.subscribe(title)
+		work.Backend.Subscribe(title)
 		log.Print(msg)
 	}
 }
@@ -139,11 +140,11 @@ func (work *Worker) showJobs() {
 
 func (worker *Worker) start() {
 	backend := worker.Backend
-	backend.subscribe(QUEUENAME)
+	backend.Subscribe(QUEUENAME)
 	go func() {
 		for {
 
-			reply, err := backend.receiveMessages()
+			reply, err := backend.ReceiveMessages()
 			//Get next job
 			if err != nil {
 
