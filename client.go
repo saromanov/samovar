@@ -56,22 +56,30 @@ func InitClient() *Client {
 }
 
 //Send provides sending arguments to the function
-func (gro *Client) Send(jobtitle string, opt *JobOptions) {
+func (gro *Client) Send(jobtitle string, opt *JobOptions) string {
+	id := RandString(jobidsize)
 	gro.back.PublishJob(prepareParameters(&JobParams{
 		Name:      jobtitle,
 		Arguments: opt.Arguments,
+		JobID:     id,
 	}), resolveQueueName(opt.Queue))
+
+	return fmt.Sprintf("Job ID: %s", id)
 }
 
-func (gro *Client) SendAsync(jobtitle string, opt *JobOptions) *AsyncResult {
+func (gro *Client) SendAsync(jobtitle string, id string, opt *JobOptions) *AsyncResult {
 	gro.Send(jobtitle, opt)
 
 	//Wait until job will be complete
 	for {
 		info, _ := getInfo(gro.client, jobtitle)
-		fmt.Println(info)
+		if info.Status == 1 {
+			break
+		}
 		time.Sleep(100 * time.Millisecond)
 	}
+
+	return &AsyncResult{Result: gro.GetResult(jobtitle, id)}
 }
 
 //SendWithDelay provides sending arguments to job with delay
@@ -122,8 +130,8 @@ func (gro *Client) SendMany(jobs []*JobOptions) {
 }
 
 //GetResult provides non-async version if getting results from the job
-func (gro *Client) GetResult(title string) interface{} {
-	result, err := getResult(gro.client, title)
+func (gro *Client) GetResult(title string, id string) interface{} {
+	result, err := getResult(gro.client, fmt.Sprintf("%s%s", title, id))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -141,8 +149,8 @@ func (gro *Client) GetResultByID(id string) interface{} {
 
 //Saveresult provides storing result of task by title "tasktile" to key-value store
 //Note: Now suppoted only redis
-func (gro *Client) SaveResult(tasktitle, key string) {
-	result := gro.GetResult(tasktitle)
+func (gro *Client) SaveResult(tasktitle, id, key string) {
+	result := gro.GetResult(tasktitle, id)
 	gro.store.Set(key, string(Marshal(result)))
 
 }

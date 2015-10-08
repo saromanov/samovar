@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+const
+(
+	jobidsize = 16
+)
+
 func detectExit() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
@@ -41,4 +46,15 @@ func Idgen() string {
 	}
 
 	return string(res)
+}
+
+//RandString returns random string for sending task
+func RandString(n int) string {
+	result := make([]rune, n)
+	items := []rune("1234567890abcdefg")
+	for i := 0; i < n; i++ {
+		rand.Seed(time.Now().UTC().UnixNano())
+		result[i] = items[rand.Intn(len(items))]
+	}
+	return string(result)
 }

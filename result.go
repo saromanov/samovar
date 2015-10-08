@@ -19,6 +19,7 @@ const (
 
 type Result struct {
 	ID           string
+	JobID        string
 	Title        string
 	Result       interface{}
 	Date         time.Time
@@ -34,7 +35,7 @@ func (res *Result) storeResult(client *redis.Client) {
 	}
 
 	results := Marshal(res)
-	client.HSet("samovar", fmt.Sprintf("%s_result", res.Title), string(results))
+	client.HSet("samovar", fmt.Sprintf("%s%s_result", res.Title, res.JobID), string(results))
 }
 
 //storeResultbyId provides setting only id and reslt of the job

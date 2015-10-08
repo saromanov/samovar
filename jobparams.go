@@ -10,6 +10,7 @@ type JobParams struct {
 	Arguments interface{}
 	Delay     uint
 	Period    uint
+	JobID     string
 	//HardDeadline represents time where task must be complete
 	Hardeadline   float64
 }
