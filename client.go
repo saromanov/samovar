@@ -1,18 +1,19 @@
 package samovar
 
 import (
+	"./backend"
+	"fmt"
 	"gopkg.in/redis.v3"
-	"time"
-	"net"
-	"net/rpc"
 	"log"
 	"math/rand"
-	"./backend"
+	"net"
+	"net/rpc"
+	"time"
 )
 
 type Client struct {
-	back backend.Backend
-	client  *redis.Client
+	back      backend.Backend
+	client    *redis.Client
 	rpcclient *rpc.Client
 	store     *Store
 }
@@ -29,7 +30,12 @@ type JobOptions struct {
 //JobItem provides information about job, getting from server
 type JobItem struct {
 	NumberOfCalls int
-	Done bool
+	Done          bool
+	Result        interface{}
+	ExecutionTime float64
+}
+
+type AsyncResult struct {
 	Result interface{}
 }
 
@@ -57,6 +63,17 @@ func (gro *Client) Send(jobtitle string, opt *JobOptions) {
 	}), resolveQueueName(opt.Queue))
 }
 
+func (gro *Client) SendAsync(jobtitle string, opt *JobOptions) *AsyncResult {
+	gro.Send(jobtitle, opt)
+
+	//Wait until job will be complete
+	for {
+		info, _ := getInfo(gro.client, jobtitle)
+		fmt.Println(info)
+		time.Sleep(100 * time.Millisecond)
+	}
+}
+
 //SendWithDelay provides sending arguments to job with delay
 func (gro *Client) SendWithDelay(jobtitle string, delay uint, args []interface{}) {
 	gro.back.PublishJob(prepareParameters(&JobParams{
@@ -75,17 +92,16 @@ func (gro *Client) SendWithPeriod(jobtitle string, sec uint, args []interface{})
 	}), "default")
 }
 
-
-//SendMany provides starting several jobs 
+//SendMany provides starting several jobs
 //which have been registered as single jobs
-func (gro *Client) SendMany(jobs[] *JobOptions) {
+func (gro *Client) SendMany(jobs []*JobOptions) {
 	if len(jobs) == 0 {
 		log.Printf("Number of sending tasks is zero")
 		return
 	}
 
 	//Get tasks randomly
-	for  {
+	for {
 		if len(jobs) == 0 {
 			break
 		}
@@ -97,8 +113,8 @@ func (gro *Client) SendMany(jobs[] *JobOptions) {
 		if job.Queue != "" {
 			queuename = job.Queue
 		}
-		gro.back.PublishJob(prepareParameters(&JobParams {
-			Name: job.Title,
+		gro.back.PublishJob(prepareParameters(&JobParams{
+			Name:      job.Title,
 			Arguments: job.Arguments,
 		}), queuename)
 	}
@@ -132,7 +148,7 @@ func (gro *Client) SaveResult(tasktitle, key string) {
 }
 
 //GetStat provides statistics for the job with title
-func (gro *Client) GetJobItem(title string)*JobItem {
+func (gro *Client) GetJobItem(title string) *JobItem {
 	var numcals int
 	errcall := gro.rpcclient.Call("Jobs.GetNumberOfCalls", title, &numcals)
 	if errcall != nil {
@@ -143,7 +159,12 @@ func (gro *Client) GetJobItem(title string)*JobItem {
 	if errcall2 != nil {
 		log.Fatal(errcall2)
 	}
-	return &JobItem{NumberOfCalls: numcals, Done:done}
+	var execution float64
+	errcall3 := gro.rpcclient.Call("Jobs.ExecutionTime", title, &execution)
+	if errcall3 != nil {
+		log.Fatal(errcall3)
+	}
+	return &JobItem{NumberOfCalls: numcals, Done: done, ExecutionTime: execution}
 }
 
 func resolveQueueName(title string) string {
@@ -152,4 +173,3 @@ func resolveQueueName(title string) string {
 	}
 	return title
 }
-

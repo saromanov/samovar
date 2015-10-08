@@ -59,6 +59,21 @@ func (j *Jobs) IsJobDone(title string, result *bool) error {
 	return nil
 }
 
+//ExecutionTime returns expected execution time for job by the title
+// in the case, if this job already been done
+func (j *Jobs) ExecutionTime(title string, result *float64) error {
+	var current float64
+	currentjob, ok := j.jobs[title]
+	if !ok {
+		current = 0.0
+		return fmt.Errorf("Job %s is not found", title)
+	} else {
+		current = currentjob.executionTime
+	}
+	*result = current
+	return nil
+}
+
 //GetJobResult returns result of job by the title with rpc call
 func (j *Jobs) GetJobResult(title string, result *interface{}) error {
 	currentjob, ok := j.jobs[title]
