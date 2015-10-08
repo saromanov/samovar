@@ -75,7 +75,7 @@ func (work *Worker) StartWorker() {
 	detectExit()
 	RegisterRPCFunction(work.jobs)
 	InitRPC("").Run()
-	api.StartServer(work.jobs)
+	api.StartServer()
 
 }
 
