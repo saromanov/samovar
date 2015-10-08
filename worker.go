@@ -7,6 +7,7 @@ import (
 	//"net/http"
 	"time"
 	"./backend"
+	"./api"
 )
 
 const (
@@ -74,7 +75,7 @@ func (work *Worker) StartWorker() {
 	detectExit()
 	RegisterRPCFunction(work.jobs)
 	InitRPC("").Run()
-	StartServer(work.jobs)
+	api.StartServer(work.jobs)
 
 }
 

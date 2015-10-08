@@ -1,30 +1,36 @@
-package samovar
+package api
 
 import (
-	"./backend"
+	"../backend"
 	"fmt"
 	"github.com/gorilla/mux"
+	"gopkg.in/redis.v3"
 	"net/http"
+	"fmt"
+	"encoding/json"
+)
+
+const (
+	Serveraddr = ":8000"
 )
 
 type JobShow struct {
 }
 
-func StartServer(jobs *Jobs) {
+func StartServer() {
 	r := mux.NewRouter()
-	client := new(Client)
-	client.client = backend.InitRedis("localhost:6379")
+	back := backend.InitRedis("localhost:6379")
 
 	//Get information about job
 	r.HandleFunc("/statjob/{title}", func(w http.ResponseWriter, req *http.Request) {
-		title := mux.Vars(req)["title"]
+		/*title := mux.Vars(req)["title"]
 		var job []*Job
 		err := jobs.GetJob(title, &job)
 		if err != nil {
 			//fmt.Printf(err)
 		}
 		//w.Write([]byte(fmt.Sprintf("%d", job.numberofcalls)))
-		return
+		return*/
 	})
 
 	//Start new job
@@ -34,7 +40,10 @@ func StartServer(jobs *Jobs) {
 			return
 		}
 
-		client.Send(title, &JobOptions{})
+		back.PublishJob(prepareParameters(&JobParams{
+				Name:      title,
+		}), "default")
+
 		w.Write([]byte(fmt.Sprintf("Job %s was sending", title)))
 	})
 
@@ -49,4 +58,18 @@ func StartServer(jobs *Jobs) {
 	})
 
 	http.ListenAndServe(":8000", r)
+}
+
+func getResult(client *redis.Client, title string) (interface{}, error) {
+	var res Result
+	result, err := client.HGet("samovar", fmt.Sprintf("%s_result", title)).Result()
+	if err != nil {
+		return nil, fmt.Errorf("Job by title %s not found", title)
+	}
+	errunm := json.Unmarshal([]byte(result), &res)
+	if errunm != nil {
+		return nil, errunm
+	}
+	return res, nil
+
 }
