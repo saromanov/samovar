@@ -81,8 +81,9 @@ func (work *Worker) StartWorker() {
 
 //AddJob provides registration of the new job
 func (work *Worker) AddJob(title string, fn interface{}) {
-	msg := fmt.Sprintf("Register new job: %s", title)
+	msg := fmt.Sprintf("Register new job: %s\n", title)
 	work.logging.LogWrite(msg)
+	MessageWithTime(msg)
 	if work.jobs.Exists(title) {
 		log.Fatal(fmt.Sprintf("Job with the title %s already registred", title))
 	}
@@ -96,7 +97,9 @@ func (work *Worker) AddJob(title string, fn interface{}) {
 //AddGroupJobs provides append group of depended of each other jobs
 func (work *Worker) AddGroupJobs(title string, groupjobs []*GroupJob) {
 	msg := fmt.Sprintf("Register new group of jobs: %s", title)
+	MessageWithTime(msg)
 	work.logging.LogWrite(msg)
+	log.Print(msg)
 	if work.jobs.Exists(title) {
 		log.Fatal(fmt.Sprintf("Job with the title %s already registred", title))
 	}

@@ -58,3 +58,7 @@ func RandString(n int) string {
 	}
 	return string(result)
 }
+
+func MessageWithTime(msg string) {
+	fmt.Printf("%s %s", time.Now().Format(time.RFC3339), msg)
+}
