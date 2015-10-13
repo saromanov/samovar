@@ -166,3 +166,8 @@ func (j *Jobs) ShortestJob()*Job {
 	}
 	return job
 }
+
+//NumberOfJobs returns total number of registred jobs
+func (j *Jobs) NumberOfJobs()int {
+	return len(j.jobs)
+}

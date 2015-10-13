@@ -70,6 +70,7 @@ func createWorker(opt *SamovarOptions) *Worker {
 
 //StartWorker provides start server
 func (work *Worker) StartWorker() {
+	MessageWithTime(fmt.Sprintf("Total registred number of jobs: %d\n", work.jobs.NumberOfJobs()))
 	log.Printf("Start worker:")
 	work.start()
 	detectExit()
@@ -96,7 +97,7 @@ func (work *Worker) AddJob(title string, fn interface{}) {
 
 //AddGroupJobs provides append group of depended of each other jobs
 func (work *Worker) AddGroupJobs(title string, groupjobs []*GroupJob) {
-	msg := fmt.Sprintf("Register new group of jobs: %s", title)
+	msg := fmt.Sprintf("Register new group of jobs: %s\n", title)
 	MessageWithTime(msg)
 	work.logging.LogWrite(msg)
 	log.Print(msg)
