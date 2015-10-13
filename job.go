@@ -15,6 +15,7 @@ type Job struct {
 	Title     string
 	Arguments interface{}
 	Id        string
+	JobID     string
 	//Number of times which job was call
 	Numberofcalls int
 	done          bool
