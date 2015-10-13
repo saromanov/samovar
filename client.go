@@ -28,7 +28,7 @@ type JobOptions struct {
 }
 
 //JobItem provides information about job, getting from server
-type JobItem struct {
+type ResultJob struct {
 	NumberOfCalls int
 	Done          bool
 	Result        interface{}
@@ -156,7 +156,7 @@ func (gro *Client) SaveResult(tasktitle, id, key string) {
 }
 
 //GetStat provides statistics for the job with title
-func (gro *Client) GetJobItem(title string) *JobItem {
+func (gro *Client) GetJobItem(title string) *ResultJob {
 	var numcals int
 	errcall := gro.rpcclient.Call("Jobs.GetNumberOfCalls", title, &numcals)
 	if errcall != nil {
@@ -172,7 +172,7 @@ func (gro *Client) GetJobItem(title string) *JobItem {
 	if errcall3 != nil {
 		log.Fatal(errcall3)
 	}
-	return &JobItem{NumberOfCalls: numcals, Done: done, ExecutionTime: execution}
+	return &ResultJob{NumberOfCalls: numcals, Done: done, ExecutionTime: execution}
 }
 
 func resolveQueueName(title string) string {

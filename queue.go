@@ -15,9 +15,14 @@ import (
 type QueueOptions struct {
 }
 
+type JobItem struct{
+	job  *Job
+	jobID string
+}
+
 //This queue provides basic data structure
 type Queue struct {
-	jobs        []*Job
+	jobs        []*JobItem
 	groupjobs   [][]*Job
 	runningjobs int32
 	title       string
@@ -28,7 +33,7 @@ type Queue struct {
 
 func CreateQueue(title string) *Queue {
 	queue := new(Queue)
-	queue.jobs = []*Job{}
+	queue.jobs = []*JobItem{}
 	queue.groupjobs = [][]*Job{}
 	queue.title = title
 	queue.runningjobs = 0
@@ -52,13 +57,16 @@ func (q *Queue) Put(job *Job, jp JobParams) {
 			Status: STARTED,
 	}
 	preresult.storeResult(q.dbstore)
+	q.jobs = append(q.jobs, &JobItem{
+		job: job,
+		jobID: jp.JobID,
+		})
 	q.runJob(job, jp)
-	q.jobs = append(q.jobs, job)
 }
 
 //Clean provides remove all jobs from queue
 func (q *Queue) Clean() {
-	q.jobs = []*Job{}
+	q.jobs = []*JobItem{}
 }
 
 func (q *Queue) PutGroup(gjob []*Job) {
@@ -95,11 +103,11 @@ func (q *Queue) Process() {
 				log.Printf("Limit has been reached on a number of jobs")
 				continue
 			}
-			for _, job := range q.jobs {
-				if job.IsDone() {
+			for _, jobitem := range q.jobs {
+				if jobitem.job.IsDone() {
 					idx := 0
 					for i, pname := range q.jobs {
-						if pname.Title == job.Title {
+						if pname.job.Title == jobitem.job.Title {
 							idx = i
 							break
 						}
@@ -108,24 +116,26 @@ func (q *Queue) Process() {
 						q.jobs = append(q.jobs[:idx], q.jobs[idx+1:]...)
 					}
 					info := Info{
-						Title:  job.Title,
-						Status: 1,
+						Title:  jobitem.job.Title,
+						JobID:  jobitem.jobID,
+						Status: Waiting,
 					}
 
 					info.storeInfo(q.dbstore)
-					resultitem, err := job.waitUntilResult()
+					resultitem, err := jobitem.job.waitUntilResult()
 					result := Result{
 						ID   : Idgen(),
-						Title: job.Title,
+						Title: jobitem.job.Title,
 						Date:  time.Now(),
 						Result: resultitem,
 						Status: FINISHED,
+						JobID: jobitem.jobID,
 					}
 					//Serialize result, in the case if task contain result value
 					if err == nil {
 						res, err := json.Marshal(resultitem)
 						if err != nil {
-							log.Fatal(fmt.Sprintf("Can't get checksum from resut of %s", job.Title))
+							log.Fatal(fmt.Sprintf("Can't get checksum from resut of %s", jobitem.job.Title))
 						}
 						result.Result = resultitem
 						result.DataChecksum = getChecksum(res)
@@ -134,8 +144,9 @@ func (q *Queue) Process() {
 					result.storeResult(q.dbstore)
 					result.storeResultById(q.dbstore)
 					info = Info{
-						Title:  job.Title,
-						Status: 0,
+						Title:  jobitem.job.Title,
+						JobID: jobitem.jobID,
+						Status: Completed,
 					}
 
 					info.storeInfo(q.dbstore)
