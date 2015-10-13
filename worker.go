@@ -6,6 +6,7 @@ import (
 	"log"
 	//"net/http"
 	"time"
+	"reflect"
 	"./backend"
 	"./api"
 )
@@ -25,6 +26,8 @@ type Worker struct {
 	jobqueue []*Job
 	jobs     *Jobs
 	stat     *Stat
+	beforefuncs map[string][]interface{}
+	afterfuncs map[string][]interface{}
 	logging  *Logging
 
 }
@@ -64,6 +67,7 @@ func createWorker(opt *SamovarOptions) *Worker {
 	}
 	worker.jobqueue = []*Job{}
 	worker.stat = new(Stat)
+	worker.beforefuncs = map[string][]interface{}{}
 	worker.logging = InitLog(opt.Logpath)
 	return worker
 }
@@ -119,6 +123,18 @@ func (work *Worker) AddQueue(title string) {
 	work.Backend.RegisterQueue(title)
 }
 
+//RegisterFuncBeforeJob provides trigger when job is started
+func (work *Worker) RegisterFuncBeforeJob(job []string, fn interface{}) {
+	for _, jb := range job {
+		_, ok := work.beforefuncs[jb]
+		if !ok {
+			work.beforefuncs[jb] = []interface{}{fn}
+		} else {
+			work.beforefuncs[jb] = append(work.beforefuncs[jb], fn)
+		}
+	}
+}
+
 
 //Register queue provides store name of queue
 func (work *Worker) registerQueue(title string) {
@@ -159,6 +175,13 @@ func (worker *Worker) start() {
 			case *redis.Message:
 				jobobject := msg.Payload
 				job := getJobArguments(jobobject)
+				funcs, ok := worker.beforefuncs[job.Name]
+				if ok {
+					for _, f := range funcs{
+						//TODO: Need to append arguments
+						go reflect.ValueOf(f).Call([]reflect.Value{})
+					}
+				}
 				var targetjob []*Job
 				//This method provides getting job or list > 1, getting group of jobs
 				err := worker.jobs.GetJob(job.Name, &targetjob)
